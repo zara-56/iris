@@ -41,53 +41,52 @@
        reuses the existing STUCK-state red, so "unresolved" markers read as
        part of the same visual language rather than a random new color. */
     :root {
-      /* Blue-grey ground, cards floating above it. The page is the darker of
-         the two, so a card reads as lifted rather than as a box drawn on a
-         surface — which is what makes borders unnecessary. */
-      --bg: #EAF0FA;
-      --panel-bg: #FFFFFF;
-      /* Nested panels sit slightly INSET: a touch darker than the card they
-         are in, so they read as recessed rather than as another floating
-         layer. Depth comes from this and the shadows, never from a line. */
-      --panel-bg-soft: #F3F7FF;
-      --panel-bg-inset: #E8EEFB;
+      /* Very light blue-grey ground with near-white cards barely above it.
+         The separation is a couple of percent of luminance plus a wide soft
+         shadow — enough to float, never enough to look like a drawn box. */
+      --bg: #EEF1F5;
+      --panel-bg: #FAFBFC;
+      /* Nested panels sit inset and slightly LIGHTER than the card they are
+         in — the card is only just lighter than the ground, so a well reads by
+         being brighter than its surround, never by a line around it. */
+      --panel-bg-soft: #FDFDFE;
+      --panel-bg-inset: #FFFFFF;
 
       /* Near-black for values, medium grey for labels. Both blue-leaning, to
          sit in the same family as the ground. */
-      --text: #16192B;
-      --text-dim: #6B7392;
-      --text-faint: #9AA2C0;
+      --text: #1E2024;
+      --text-dim: #7A8088;
+      --text-faint: #A6ACB4;
 
       /* Borders exist only where something genuinely must be divided, and
          then barely. Most components use no border at all. */
-      --border: rgba(58, 66, 140, 0.10);
+      --border: rgba(30, 32, 36, 0.05);
 
-      /* The accent is a real colour now, not charcoal. The interface used to
-         reserve colour for judgements and mute even those, which left every
-         other surface grey — correct, and completely lifeless. One saturated
-         indigo carries the interactive parts, the orb's cyan carries anything
-         that glows, and the two judgement colours are as vivid as their
-         contrast against white allows. */
-      --accent: #3D5AFE;
-      --accent-strong: #2A3EEA;
-      --accent-soft: rgba(61, 90, 254, 0.10);
-      --accent-glow: rgb(34, 224, 255); /* the orb's own cyan, brightened to match */
+      /* Dark charcoal is the ONLY accent. There is no blue anywhere in the
+         chrome: the active nav square, the key figures and every interactive
+         fill are the same near-black, which is what keeps the page reading as
+         one almost-monochrome surface. The two judgement colours stay, because
+         they are the only places a colour means something. */
+      --accent: #23262B;
+      --accent-strong: #14161A;
+      --accent-soft: rgba(30, 32, 36, 0.05);
+      --accent-glow: #6B7178; /* the light end of the charcoal, for gradients */
       --danger: #E03131;
       --danger-soft: rgba(224, 49, 49, 0.10);
       --ok: #0CA678;
       --ok-soft: rgba(12, 166, 120, 0.12);
 
-      /* Diffuse and indigo-tinted, never grey-black: a wide soft cast plus a
-         barely-there contact shadow. Two stops so the falloff is smooth
-         rather than a single hard ring of blur. Deeper than they were — a
-         shadow this pale on a tinted ground was doing no lifting at all. */
-      --shadow: 0 1px 2px rgba(38, 52, 140, 0.06), 0 8px 24px -8px rgba(38, 52, 140, 0.14), 0 24px 48px -24px rgba(38, 52, 140, 0.18);
-      --shadow-soft: 0 1px 2px rgba(38, 52, 140, 0.05), 0 6px 16px -8px rgba(38, 52, 140, 0.12);
-      --shadow-lift: 0 2px 4px rgba(38, 52, 140, 0.08), 0 14px 32px -10px rgba(38, 52, 140, 0.20);
+      /* Very large blur, very low opacity, no contact shadow at all: the
+         cards should look gently raised off the ground, not stamped onto it.
+         The tight 1-2px stop that used to lead each of these read as an edge,
+         which is the one thing a diffuse shadow must not have. */
+      --shadow: 0 18px 50px -18px rgba(24, 28, 36, 0.13), 0 40px 90px -40px rgba(24, 28, 36, 0.10);
+      --shadow-soft: 0 12px 32px -14px rgba(24, 28, 36, 0.10), 0 26px 60px -34px rgba(24, 28, 36, 0.08);
+      --shadow-lift: 0 22px 60px -20px rgba(24, 28, 36, 0.16), 0 46px 100px -46px rgba(24, 28, 36, 0.12);
 
       /* Radii. Nothing in this interface has a sharp corner. */
-      --radius-card: 22px;
-      --radius-inner: 16px;
+      --radius-card: 24px;
+      --radius-inner: 18px;
       --radius-pill: 999px;
 
       /* One family throughout, at light weights. */
@@ -110,7 +109,7 @@
       display: flex;
       flex-direction: row;
       font-family: var(--font-body);
-      font-weight: 400;
+      font-weight: 300;
       /* Light weights on a light ground go muddy without this — the stems
          thin out and the whole interface reads softer, which is the point. */
       -webkit-font-smoothing: antialiased;
@@ -119,7 +118,7 @@
       color: var(--text);
       font-family: var(--font-heading);
       font-size: 26px;
-      font-weight: 500;
+      font-weight: 300;
       letter-spacing: -0.4px;
     }
 
@@ -1096,14 +1095,16 @@
     #nav-dashboard-btn::before { content: '\229E'; } /* squared plus — panels */
     .nav-tab:hover:not(.active) {
       background: var(--accent-soft);
-      color: var(--accent);
+      color: var(--text);
     }
-    /* The brightest thing in the interface, and the only saturated block in
-       the chrome — which is what makes "you are here" readable at a glance. */
+    /* A dark rounded square — the one near-black block in the chrome, and the
+       only thing on the page allowed to be a solid fill. Flat, not a gradient:
+       a gradient reads as a coloured button, a flat charcoal square reads as
+       "you are here". */
     .nav-tab.active {
-      background: linear-gradient(140deg, var(--accent), var(--accent-strong));
+      background: var(--accent-strong);
       color: #fff;
-      box-shadow: 0 6px 18px -6px rgba(61, 90, 254, 0.65);
+      box-shadow: 0 10px 24px -12px rgba(24, 28, 36, 0.45);
     }
 
     /* ===== View switching ===== */
@@ -1235,7 +1236,10 @@
     #dashboard-view {
       padding: 40px 44px 96px;
     }
-    #dashboard-view > .panel {
+    /* Descendant, not child: the panels now live one level deeper, inside
+       .dash-pane. As a direct-child selector this rule stopped matching and
+       every panel went full-bleed. */
+    #dashboard-view .panel {
       max-width: 1040px;
       margin-left: auto;
       margin-right: auto;
@@ -1264,7 +1268,7 @@
       margin: 0 0 6px;
       font-family: var(--font-heading);
       font-size: 19px;
-      font-weight: 500;
+      font-weight: 400;
       letter-spacing: -0.3px;
       text-transform: none;
       color: var(--text);
@@ -1312,7 +1316,7 @@
     .setting-title {
       font-family: var(--font-heading);
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 400;
       color: var(--text);
     }
     /* The current value is the point of the control, so it is set like a
@@ -1320,7 +1324,7 @@
     .setting-value {
       font-family: var(--font-heading);
       font-size: 17px;
-      font-weight: 500;
+      font-weight: 400;
       font-variant-numeric: tabular-nums;
       color: var(--text);
       white-space: nowrap;
@@ -1364,7 +1368,7 @@
       border-radius: 50%;
       border: none;
       background: var(--accent);
-      box-shadow: 0 2px 6px rgba(61, 90, 254, 0.5);
+      box-shadow: 0 6px 14px -6px rgba(24, 28, 36, 0.45);
       transition: transform 0.15s ease;
     }
     .setting input[type="range"]:active::-webkit-slider-thumb {
@@ -1389,6 +1393,401 @@
     }
     .settings-foot .setting-note { margin: 0; }
 
+    /* ---- Dashboard tabs ---- */
+    /* No pill bar and no container at all: the tabs sit straight on the
+       ground as plain labels, which is as quiet as a tab strip gets. */
+    .dash-tabs {
+      display: flex;
+      gap: 26px;
+      max-width: 1040px;
+      margin: 0 auto 26px;
+      padding: 2px 6px;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .dash-tab {
+      flex: 0 0 auto;
+      padding: 8px 2px 10px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text-dim);
+      font-family: var(--font-heading);
+      font-size: 13.5px;
+      font-weight: 400;
+      cursor: pointer;
+      box-shadow: inset 0 -1px 0 transparent;
+      transition: color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .dash-tab:hover:not(.active) {
+      background: transparent;
+      color: var(--text);
+    }
+    /* The active tab is charcoal text over a short charcoal rule. No fill:
+       a filled tab was the loudest thing on the page and it was carrying the
+       least information. */
+    .dash-tab.active {
+      background: transparent;
+      color: var(--text);
+      box-shadow: inset 0 -1.5px 0 var(--accent);
+    }
+    .dash-pane { display: none; }
+    .dash-pane.active { display: block; }
+
+    /* ---- The one-sentence summary ---- */
+    /* Set like a pull quote rather than like a stat: it is the only thing on
+       the page that is a sentence, and it should read as one. */
+    /* A card like every other card. It used to be a saturated banner, which
+       made the one sentence on the page shout louder than the figures it was
+       summarising. */
+    .panel-summary {
+      background: var(--panel-bg);
+      box-shadow: var(--shadow);
+    }
+    .summary-sentence {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 21px;
+      font-weight: 300;
+      line-height: 1.55;
+      letter-spacing: -0.3px;
+      color: var(--text);
+      max-width: 62ch;
+    }
+
+    /* ---- Stat hierarchy: one hero, four minors ---- */
+    .stat-hero-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.9fr) 2fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    @media (max-width: 860px) {
+      .stat-hero-grid { grid-template-columns: 1fr; }
+    }
+    .stat-minor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+    }
+    /* The hero is the only figure on the page allowed to be this size — that
+       size IS the hierarchy, so nothing else may borrow it. */
+    .stat-card.hero {
+      display: flex;
+      flex-direction: column;
+      padding: 26px 28px 22px;
+      background: var(--panel-bg-soft);
+      box-shadow: var(--shadow-soft);
+    }
+    .stat-card.hero .stat-value {
+      font-size: 78px;
+      line-height: 1;
+      letter-spacing: -3px;
+      margin-top: 6px;
+      color: var(--text);
+    }
+    .stat-card.hero .stat-label {
+      margin: 0;
+      order: -1;
+      font-size: 12.5px;
+    }
+    .stat-card .stat-label { margin: 0 0 6px; }
+    .stat-card .stat-value { font-size: 26px; letter-spacing: -0.8px; }
+
+    /* ---- Sparklines and deltas ---- */
+    .sparkline {
+      display: block;
+      width: 100%;
+      height: 24px;
+      margin-top: 12px;
+      overflow: visible;
+    }
+    .stat-card.hero .sparkline { height: 34px; margin-top: auto; padding-top: 18px; }
+    .spark-caption {
+      margin-top: 6px;
+      font-size: 10.5px;
+      letter-spacing: 0.3px;
+      color: var(--text-faint);
+    }
+    .stat-delta {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-faint);
+    }
+    .stat-delta.up { color: var(--ok); }
+    .stat-delta.down { color: var(--danger); }
+    .stat-delta.flat { color: var(--text-faint); }
+
+    /* ---- Fatigue curve: the centrepiece ---- */
+    /* Deliberately taller and wider than every other panel. It is the one
+       chart that answers a question nothing else on the page can. */
+    .panel-fatigue {
+      max-width: 1180px !important;
+      padding-bottom: 30px;
+    }
+    .fatigue-chart {
+      position: relative;
+      width: 100%;
+      height: 340px;
+      border-radius: var(--radius-inner);
+      background: var(--panel-bg-inset);
+      overflow: hidden;
+    }
+    .fatigue-chart svg { display: block; width: 100%; height: 100%; }
+    .fatigue-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 8px; }
+    .legend-item .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .swatch.curve { background: linear-gradient(140deg, var(--accent), var(--accent-glow)); }
+    .swatch.intervention { background: var(--ok); transform: rotate(45deg); border-radius: 2px; }
+    .swatch.peak { background: var(--danger); }
+
+    /* ---- Goals ---- */
+    .goal-add {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .goal-add input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--panel-bg-inset);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13.5px;
+    }
+    .goal-add input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .goal-add button {
+      padding: 12px 22px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: var(--accent-strong);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .goal-active-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 18px;
+      margin-bottom: 16px;
+      padding: 16px 20px;
+      border-radius: var(--radius-inner);
+      background: var(--accent-strong);
+      color: #fff;
+    }
+    .goal-active-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .goal-active-timer {
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .goal-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: var(--radius-inner);
+      background: var(--panel-bg-inset);
+    }
+    .goal-row.active { background: var(--accent-soft); }
+    .goal-row:last-child { margin-bottom: 0; }
+    .goal-name { flex: 1; font-size: 13.5px; color: var(--text); }
+    .goal-row.active .goal-name { font-weight: 500; color: var(--accent); }
+    .goal-total {
+      font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .goal-row button {
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--panel-bg);
+      color: var(--text-dim);
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .goal-row button:hover { border-color: var(--accent); color: var(--accent); }
+    .goal-row button.goal-activate.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ---- Revision flashcards ---- */
+    .flashcard-stage { perspective: 1200px; }
+    .flashcard {
+      padding: 30px 32px;
+      border-radius: var(--radius-inner);
+      background: var(--panel-bg-inset);
+      box-shadow: var(--shadow-soft);
+      animation: flashcard-in 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    @keyframes flashcard-in {
+      from { opacity: 0; transform: translateY(8px) scale(0.985); }
+      to   { opacity: 1; transform: none; }
+    }
+    .flashcard-topic {
+      margin: 0 0 4px;
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.4px;
+      color: var(--text);
+    }
+    .flashcard-meta {
+      margin: 0 0 18px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .flashcard-question {
+      margin: 0 0 18px;
+      font-size: 15.5px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .flashcard-due {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .flashcard-due-label {
+      width: 100%;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .flashcard-due button {
+      padding: 8px 15px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--panel-bg);
+      color: var(--text-dim);
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+    .flashcard-due button:hover { border-color: var(--accent); color: var(--accent); }
+    .flashcard-due input[type="date"] {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--panel-bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 12.5px;
+    }
+    .flashcard-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .flashcard-nav button {
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--panel-bg-inset);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .flashcard-nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .flashcard-nav button:disabled { opacity: 0.4; cursor: default; }
+    .flashcard-counter {
+      font-size: 12.5px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-dim);
+    }
+
+    /* ---- Session detail ---- */
+    .session-strip.clickable { cursor: pointer; }
+    .session-strip.clickable:hover .session-strip-label { color: var(--accent); }
+    .session-strip.open .session-strip-label { color: var(--accent); font-weight: 500; }
+    .session-detail {
+      margin: 6px 0 18px;
+      padding: 18px 20px;
+      border-radius: var(--radius-inner);
+      background: var(--panel-bg-inset);
+    }
+    .session-detail-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+    .session-event {
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+    }
+    .session-event:first-of-type { border-top: none; }
+    .session-event-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .session-event-time {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+    .session-event-topic { font-weight: 500; }
+    .session-tag {
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .session-tag.resolved { background: var(--ok-soft); color: var(--ok); }
+    .session-tag.unresolved { background: var(--danger-soft); color: var(--danger); }
+    .session-tag.helped { background: var(--accent-soft); color: var(--accent); }
+    .session-event-help {
+      margin: 8px 0 0;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+
     /* ---- Panel 1: Today (stat cards) ---- */
     .stat-grid {
       display: grid;
@@ -1398,6 +1797,8 @@
     /* Inset, not floating: a shade darker than the card it sits in, so it
        reads as a well rather than as a second card stacked on the first. */
     .stat-card {
+      display: flex;
+      flex-direction: column;
       background: var(--panel-bg-inset);
       border: none;
       border-radius: var(--radius-inner);
@@ -1419,8 +1820,11 @@
       letter-spacing: -1.2px;
       color: var(--text);
     }
+    /* The label sits ABOVE the figure — small and grey over large and dark,
+       which is the whole of the type hierarchy here. */
     .stat-label {
-      margin-top: 8px;
+      order: -1;
+      margin: 0 0 6px;
       font-size: 11.5px;
       font-weight: 400;
       letter-spacing: 0.2px;
@@ -2045,7 +2449,7 @@
          Saturate + contrast are doing the "vivid" half of the job: the ramp
          is already saturated, and pushing it further here costs nothing per
          frame because it is a compositor filter, not a per-pixel loop. */
-      filter: blur(1.5px) saturate(1.35) contrast(1.12);
+      filter: blur(2px) saturate(1.35) contrast(1.12);
       /* Additive-ish over the black stage, so overlapping pooled colour gets
          BRIGHTER rather than muddier — the single biggest reason the old
          heatmap looked washed out where it mattered most. */
@@ -2374,36 +2778,99 @@
     </div>
 
     <div id="dashboard-view" class="view">
-      <!-- 1. Today -->
-      <section class="panel" id="panel-today">
-        <div class="gaze-header">
-          <div class="gaze-header-text">
-            <h2>Today</h2>
-            <p class="panel-subtitle">Everything below is read from the events IRIS actually recorded.</p>
-          </div>
-        </div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="stat-hours">–</div>
-            <div class="stat-label">Hours studied</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="stat-focus">–</div>
-            <div class="stat-label">Focus ratio</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="stat-events">–</div>
-            <div class="stat-label">Events triggered</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="stat-resolved">–</div>
-            <div class="stat-label">Resolved</div>
-          </div>
-        </div>
-        <p class="panel-empty hidden" id="today-empty">No struggles recorded today yet — they'll show up here once IRIS catches a STUCK moment.</p>
-      </section>
+      <!-- Two tabs. Overview is what the app has learned about you; Settings is
+           the machinery. Both panes stay mounted so switching is instant and
+           neither has to be rebuilt from storage on every click. -->
+      <div class="dash-tabs" role="tablist">
+        <button class="dash-tab active" type="button" role="tab" data-dash-tab="overview"
+          aria-selected="true">Overview</button>
+        <button class="dash-tab" type="button" role="tab" data-dash-tab="settings"
+          aria-selected="false">Settings</button>
+      </div>
 
-      <!-- 3. Difficulty Patterns -->
+      <!-- ===================== OVERVIEW ===================== -->
+      <div class="dash-pane active" id="dash-overview" role="tabpanel">
+
+        <!-- 1. One sentence, generated from the events themselves. -->
+        <section class="panel panel-summary" id="panel-summary">
+          <p class="summary-sentence" id="summary-sentence">Nothing recorded yet.</p>
+        </section>
+
+        <!-- 2. The numbers, with one of them much bigger than the rest. -->
+        <section class="panel" id="panel-today">
+          <div class="stat-hero-grid">
+            <div class="stat-card hero">
+              <div class="stat-label">Hours studied today</div>
+              <div class="stat-value" id="stat-hours">–</div>
+              <div class="stat-delta" id="delta-hours"></div>
+              <svg class="sparkline" id="spark-hours" viewBox="0 0 100 34" preserveAspectRatio="none"
+                aria-hidden="true"></svg>
+              <div class="spark-caption">Last 7 days</div>
+            </div>
+            <div class="stat-minor-grid">
+              <div class="stat-card">
+                <div class="stat-label">Sessions</div>
+                <div class="stat-value" id="stat-sessions">–</div>
+                <div class="stat-delta" id="delta-sessions"></div>
+                <svg class="sparkline" id="spark-sessions" viewBox="0 0 100 24" preserveAspectRatio="none"
+                  aria-hidden="true"></svg>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Focus ratio</div>
+                <div class="stat-value" id="stat-focus">–</div>
+                <div class="stat-delta" id="delta-focus"></div>
+                <svg class="sparkline" id="spark-focus" viewBox="0 0 100 24" preserveAspectRatio="none"
+                  aria-hidden="true"></svg>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Events triggered</div>
+                <div class="stat-value" id="stat-events">–</div>
+                <div class="stat-delta" id="delta-events"></div>
+                <svg class="sparkline" id="spark-events" viewBox="0 0 100 24" preserveAspectRatio="none"
+                  aria-hidden="true"></svg>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Events resolved</div>
+                <div class="stat-value" id="stat-resolved">–</div>
+                <div class="stat-delta" id="delta-resolved"></div>
+                <svg class="sparkline" id="spark-resolved" viewBox="0 0 100 24" preserveAspectRatio="none"
+                  aria-hidden="true"></svg>
+              </div>
+            </div>
+          </div>
+          <p class="panel-empty hidden" id="today-empty">No struggles recorded today yet — they'll show up here once IRIS catches a STUCK moment.</p>
+        </section>
+
+        <!-- 3. The centrepiece. -->
+        <section class="panel panel-fatigue" id="panel-fatigue">
+          <h2>Fatigue curve</h2>
+          <p class="panel-subtitle">Every stuck moment ever recorded, placed by how far into its
+            session it happened — all sessions laid over one another. The peak is when your
+            attention actually gives out. Diamonds are the moments IRIS stepped in.</p>
+          <div class="fatigue-chart" id="fatigue-chart"></div>
+          <div class="fatigue-legend">
+            <span class="legend-item"><i class="swatch curve"></i>Stuck moments</span>
+            <span class="legend-item"><i class="swatch intervention"></i>Help given</span>
+            <span class="legend-item"><i class="swatch peak"></i>Peak</span>
+          </div>
+          <p class="panel-empty hidden" id="fatigue-empty">No sessions recorded yet — the curve needs at least one stuck moment to plot.</p>
+        </section>
+
+        <!-- 4. Goals -->
+        <section class="panel" id="panel-goals">
+          <h2>Goals</h2>
+          <p class="panel-subtitle">What you are working towards. Mark one active and IRIS times this
+            session against it; the total is every session it has ever been active for.</p>
+          <form class="goal-add" id="goal-add">
+            <input type="text" id="goal-input" maxlength="120" autocomplete="off"
+              placeholder="Add a goal — e.g. Finish the compilers coursework">
+            <button type="submit">Add</button>
+          </form>
+          <div class="goal-active-strip hidden" id="goal-active-strip"></div>
+          <div class="goal-list" id="goal-list"></div>
+          <p class="panel-empty hidden" id="goals-empty">No goals yet. Add one above and mark it active to start timing against it.</p>
+        </section>
+
       <section class="panel" id="panel-difficulty">
         <h2>Difficulty Patterns</h2>
         <p class="panel-subtitle">Topics ranked by how often they go unresolved.</p>
@@ -2411,32 +2878,39 @@
         <p class="panel-empty hidden" id="difficulty-empty">Not enough labeled struggles yet to find patterns.</p>
       </section>
 
-      <!-- 4. Session Timeline -->
-      <section class="panel" id="panel-timeline">
-        <h2>Session Timeline</h2>
-        <p class="panel-subtitle">Recent sessions, with stuck moments marked along the way.</p>
-        <div id="timeline-sessions"></div>
-        <p class="panel-empty hidden" id="timeline-empty">No sessions recorded yet.</p>
-      </section>
+        <!-- 6. Revision, one card at a time. -->
+        <section class="panel" id="panel-revision">
+          <h2>Revision</h2>
+          <p class="panel-subtitle">Every card you have, not only the ones that happen to be due.
+            When each one comes back is your call, and nothing reschedules itself behind you.</p>
+          <div class="flashcard-stage" id="revision-list"></div>
+          <div class="flashcard-nav hidden" id="revision-nav">
+            <button type="button" id="revision-prev">‹ Previous</button>
+            <span class="flashcard-counter" id="revision-counter">–</span>
+            <button type="button" id="revision-next">Next ›</button>
+          </div>
+          <p class="panel-empty hidden" id="revision-empty">Nothing to review yet.</p>
+        </section>
 
-      <!-- 5. Help History -->
+        <!-- 7. Session timeline, click a session to open it. -->
+        <section class="panel" id="panel-timeline">
+          <h2>Session Timeline</h2>
+          <p class="panel-subtitle">Recent sessions, with stuck moments marked along the way. Click a
+            session to see what happened in it.</p>
+          <div id="timeline-sessions"></div>
+          <p class="panel-empty hidden" id="timeline-empty">No sessions recorded yet.</p>
+        </section>
+
       <section class="panel" id="panel-help-history">
         <h2>Help History</h2>
         <p class="panel-subtitle">What you were stuck on, and what IRIS said.</p>
         <div class="help-history-list" id="help-history-list"></div>
         <p class="panel-empty hidden" id="help-history-empty">IRIS hasn't offered any help yet.</p>
       </section>
+      </div>
 
-      <!-- 6. Revision -->
-      <section class="panel" id="panel-revision">
-        <h2>Revision</h2>
-        <p class="panel-subtitle">Unresolved struggles from more than a day ago, resurfaced for review.</p>
-        <div class="revision-list" id="revision-list"></div>
-        <p class="panel-empty hidden" id="revision-empty">Nothing due for review right now.</p>
-      </section>
-
-      <!-- 7. Settings -->
-      <!-- 7. Appearance -->
+      <!-- ===================== SETTINGS ===================== -->
+      <div class="dash-pane" id="dash-settings" role="tabpanel">
       <section class="panel" id="panel-appearance">
         <h2>Orb Style</h2>
         <!-- <p class="panel-subtitle">How the floating orb is drawn. Only the look changes — both styles
@@ -2518,7 +2992,6 @@
         </div>
       </section>
 
-      <!-- 8. Data -->
       <section class="panel" id="panel-data">
         <h2>Data</h2>
         <p class="panel-subtitle">Housekeeping for the stored struggle events. Neither of these
@@ -2557,6 +3030,7 @@
           </div>
         </div>
       </section>
+      </div>
     </div>
   </div>
 
@@ -2911,6 +3385,24 @@
     // is actually asked for, so nothing is screenshotted unless it is wanted.
     let currentStuckContext = null; // { eventId, gazeX, gazeY } while a STUCK moment is live
 
+    // ----- Who raised the offer that is currently open -----
+    // null while nothing is open or while the DETECTOR raised it; the source
+    // string ('head tilt', 'Cmd/Ctrl+Shift+H', ...) when the reader asked for
+    // it themselves. Two rules below turn on this one distinction:
+    //
+    //   - auto-clear may only take back an offer the detector raised. The
+    //     detector's offers are a guess, and resuming progress says the guess
+    //     was wrong; a summon is not a guess, and progress resuming says
+    //     nothing about whether the reader still wants the help they asked
+    //     for. This was cancelling manual summons inside a second, because
+    //     the very act of tilting the head moves the gaze into new zones.
+    //
+    //   - a summon must never feed the adaptive sustain rule. That rule exists
+    //     to make the DETECTOR more conservative when its guesses are being
+    //     dismissed; counting offers the reader asked for was raising the bar
+    //     for the detector on evidence that had nothing to do with it.
+    let stuckMomentSummonedBy = null;
+
     // Every card message goes through here rather than straight to the bridge,
     // so there is one place to look for everything the card is told.
     function sendHelpCard(message) {
@@ -3011,6 +3503,7 @@
       // time so the region is the one that triggered the offer, not wherever
       // the eyes have wandered since.
       currentStuckContext = context || null;
+      stuckMomentSummonedBy = (context && context.summonedBy) || null;
       helpPanelLookedAwaySince = null;
       helpPanelFading = false;
       helpTargetRect = null;
@@ -3054,6 +3547,9 @@
       // Held past the clearing below: verification needs the event id and the
       // baseline that was frozen when this offer fired.
       const closingContext = currentStuckContext;
+      // Same reason: the adaptive rule below has to know whether this offer
+      // was the detector's guess or the reader's own request.
+      const wasSummonedBy = stuckMomentSummonedBy;
       // Every stuck moment now leaves a record of how it ended, not just the
       // accepted ones. Read before currentStuckContext is cleared below.
       if (currentStuckContext && currentStuckContext.eventId) {
@@ -3070,6 +3566,7 @@
       helpStage = null;
       helpAnswerStreaming = false;
       currentStuckContext = null;
+      stuckMomentSummonedBy = null;
       helpTargetRect = null;
       helpCardRect = null;
       helpPanelLookedAwaySince = null;
@@ -3115,7 +3612,12 @@
       // no prompt, and nothing for them to answer. The reading either resumes
       // or it does not.
       if (wasAccepted && closingContext) {
-        beginVerification(closingContext.eventId, closingContext.baseline);
+        beginVerification(closingContext.eventId, closingContext.baseline, wasSummonedBy);
+      } else if (!wasAccepted && wasSummonedBy) {
+        // Dismissing help you asked for yourself says nothing about the
+        // detector's judgement, because the detector made none.
+        console.log(`[adaptive] dismissed (${reason}) — not counted: ` +
+          `this offer was summoned (${wasSummonedBy}), not detected.`);
       } else if (!wasAccepted) {
         // A dismissal is its own answer, and it will never produce a
         // verification window — so it feeds the sustain requirement directly.
@@ -3296,12 +3798,15 @@
 
     // Starts the window. Called when the card closes on an ACCEPTED offer —
     // there is nothing to verify about an offer that was never taken up.
-    function beginVerification(eventId, baseline) {
+    function beginVerification(eventId, baseline, summonedBy = null) {
       if (!eventId || !baseline) return;
 
       pendingVerification = {
         eventId,
         baseline,
+        // Carried through so the verdict can be recorded without feeding the
+        // adaptive rule when the reader summoned this help themselves.
+        summonedBy,
         startedAt: performance.now(),
         // Filled in as the window runs.
         progressPeak: 0,
@@ -3347,8 +3852,8 @@
       // ----- The return-to-region watch, which runs the full 3 minutes -----
       if (!v.returned && smoothedGazeX !== null && smoothedGazeY !== null) {
         const zone = zoneAt(
-          clamp(smoothedGazeX, 0, window.innerWidth - 1),
-          clamp(smoothedGazeY, 0, window.innerHeight - 1),
+          clamp(smoothedGazeX, 0, screenW() - 1),
+          clamp(smoothedGazeY, 0, screenH() - 1),
         );
         const col = zone % ZONE_COLS;
         const row = Math.floor(zone / ZONE_COLS);
@@ -3449,7 +3954,15 @@
         `${stayedAway ? 'did not return to the region' : `returned after ${Math.round((v.returnedAt - v.startedAt) / 1000)}s`}`);
 
       // ----- Feedback into the sustain requirement -----
-      registerInterventionOutcome(verdict === 'resolved', `verified ${verdict}`);
+      // Detector offers only. The rule tunes how sure the DETECTOR has to be
+      // before it fires, so an outcome from help the reader asked for is not
+      // evidence about it either way.
+      if (v.summonedBy) {
+        console.log(`[adaptive] verified ${verdict}, but this offer was summoned ` +
+          `(${v.summonedBy}) — not counted toward the sustain requirement.`);
+      } else {
+        registerInterventionOutcome(verdict === 'resolved', `verified ${verdict}`);
+      }
 
       if (nextDue) {
         console.log(`[verify] queued for revision in ` +
@@ -3831,9 +4344,13 @@
       return { row: bestRow, cycles: best, counts };
     }
 
+    // The zone grid divides the SCREEN, not the window. A grid tied to the
+    // window changed shape every time the window was resized, so the same spot
+    // on the page fell into different zones before and after — and when the
+    // window was small, the whole grid collapsed onto a strip.
     function zoneAt(x, y) {
-      const column = clamp(Math.floor((x / window.innerWidth) * ZONE_COLS), 0, ZONE_COLS - 1);
-      const row = clamp(Math.floor((y / window.innerHeight) * ZONE_ROWS), 0, ZONE_ROWS - 1);
+      const column = clamp(Math.floor((x / screenW()) * ZONE_COLS), 0, ZONE_COLS - 1);
+      const row = clamp(Math.floor((y / screenH()) * ZONE_ROWS), 0, ZONE_ROWS - 1);
       return row * ZONE_COLS + column;
     }
 
@@ -3920,8 +4437,11 @@
       currentAttentionState = 'stuck';
       window.iris?.setOrbState?.('stuck');
 
-      const captureX = clamp(smoothedGazeX, ORB_RADIUS, window.innerWidth - ORB_RADIUS);
-      const captureY = clamp(smoothedGazeY, ORB_RADIUS, window.innerHeight - ORB_RADIUS);
+      // Converted out of screen space: the capture anchor is handed to the
+      // main process in this window's viewport coordinates, which is the
+      // contract it has always had.
+      const captureX = clamp(toViewportX(smoothedGazeX), ORB_RADIUS, window.innerWidth - ORB_RADIUS);
+      const captureY = clamp(toViewportY(smoothedGazeY), ORB_RADIUS, window.innerHeight - ORB_RADIUS);
       const eventId = recordStruggleEvent({
         dwellMs: Math.round(trigger.heldMs),
         anchorX: captureX,
@@ -4215,10 +4735,21 @@
       //
       // Only while UNACCEPTED. Once the card holds an answer, reading on is how
       // you consume it, not a reason to snatch it away.
+      // ...and only for offers the DETECTOR raised. An offer the reader
+      // summoned can be ended by a gesture, a keypress or its own timeout, and
+      // by nothing else: they asked for it, and progress resuming is not them
+      // taking that back. (It was ending them within a second of opening,
+      // because moving the head into the tilt moves the gaze across new zones,
+      // which is exactly what "progress resumed" measures.)
       if (stuckMomentActive && helpStage === 'offer' && live && warmedUp && !idle && !qualifies) {
-        console.log(`[auto-clear] progress resumed (${progress} new zones` +
-          `${progressRatio === null ? '' : `, ratio ${progressRatio.toFixed(2)}`}) — clearing silently.`);
-        endStuckMoment(now, 'progress resumed');
+        if (stuckMomentSummonedBy) {
+          console.log(`[auto-clear] progress resumed, but this offer was summoned ` +
+            `(${stuckMomentSummonedBy}) — leaving it up.`);
+        } else {
+          console.log(`[auto-clear] progress resumed (${progress} new zones` +
+            `${progressRatio === null ? '' : `, ratio ${progressRatio.toFixed(2)}`}) — clearing silently.`);
+          endStuckMoment(now, 'progress resumed');
+        }
       }
 
       const contentSettledMs = now - lastContentChangeAt;
@@ -4665,6 +5196,8 @@
 
     // ===== Gesture controls for the help card =====
     //
+    //   head tilt          -> summon help (20° off resting roll, held 500ms)
+    //   Cmd/Ctrl+Shift+H   -> summon help (the fallback for the tilt)
     //   double blink       -> accept (same as "Yes, help me")
     //   brow raise         -> reject
     //   either, once the card is out -> dismiss
@@ -4681,48 +5214,52 @@
 
     // ===== Gesture signals =====
     //
-    // Each gesture reads SEVERAL blendshapes rather than one. A single shape is
-    // noisy and partial: browInnerUp alone misses a reader who raises mostly
-    // the outer brow, and browDownLeft alone misses an asymmetric frown. The
-    // composites below are what actually get thresholded.
+    // Each face gesture reads SEVERAL blendshapes rather than one. A single
+    // shape is noisy and partial: browInnerUp alone misses a reader who raises
+    // mostly the outer brow. The composites below are what actually get
+    // thresholded. Summoning help reads no blendshape at all — it is the gaze
+    // hold further down.
+
+    // ===== THE MARGINS — the numbers to tune =====
+    // Neither gesture is judged against a fixed level any more. Each is judged
+    // against how far the signal has risen above THIS reader's own resting
+    // value, which the rolling baselines below learn continuously. These four
+    // numbers are the whole of that judgement, and each belongs to one gesture
+    // only — see the separation rule immediately below.
+    // The head tilt that summons help. Degrees, and measured as a rise above
+    // this reader's own resting roll — nobody holds their head at exactly 0°,
+    // and an absolute angle would be permanently half-triggered for one reader
+    // and out of reach for another.
+    const TILT_MARGIN_DEG = 20;       // tilt this far from resting roll, either side
+    const TILT_REARM_BAND_DEG = 6;    // ...and come back within this of it to re-arm
+
+    const BROW_MARGIN = 0.18;         // brow raise must rise this far above its baseline
+    const BROW_REARM_BAND = 0.07;     // ...and come back within this of it to re-arm
 
     // ===== THE SEPARATION RULE =====
-    // Four detectors read this face, and they are now strictly independent:
+    // Four signals answer for this reader, and they are strictly independent:
     //
-    //   1. FROWN        -> summon help          (browDown shapes only)
+    //   1. HEAD TILT    -> summon help          (head-pose roll only, no
+    //                                            blendshape at all)
     //   2. BROW RAISE   -> dismiss              (browInnerUp/browOuterUp only)
     //   3. DOUBLE BLINK -> accept the offer     (eyeBlink shapes only)
     //   4. the gaze pipeline's blink-discard    (gaze.js, its own threshold)
     //
     // No constant, composite or piece of state below may be shared between
-    // them. That sharing is what made the frown regress three times: each time
-    // the brow or blink numbers were tuned, something the frown also depended
-    // on moved with them. Specifically, frownScore used to multiply itself by
-    // (1 - browInnerUp/2) — so the frown's score was a function of the brow
-    // raise's own blendshape, and every change to how the brow raise was
-    // understood silently rescaled the frown.
+    // them. That sharing is what made the old frown regress repeatedly: each
+    // time the brow or blink numbers were tuned, something the frown also
+    // depended on moved with them.
     //
     // If you tune one of these four, you must be able to do it without opening
     // the others. Keep it that way.
-
-    // Frown: the two brow-LOWERING shapes, and nothing else. There is no
-    // browInnerUp term any more.
     //
-    // The suppression it used to carry existed to stop a brow raise reading as
-    // a weak frown, but that job is already done — and done better — by
-    // measuring the frown as a RISE above this reader's resting browDown (see
-    // frownRise below): raising the brows pushes browDown DOWN, which makes the
-    // rise negative, which cannot cross any positive threshold. The suppression
-    // was therefore buying nothing and costing a great deal: MediaPipe
-    // co-activates browInnerUp with browDown far more than a real face does — a
-    // deliberate furrow routinely reports browInnerUp at 0.5-0.7 at the same
-    // time — so it was scaling the peak of a genuine frown down by about a
-    // third while the resting baseline, measured with the brows relaxed, was
-    // barely scaled at all. The rise it left behind was a fraction of the real
-    // movement, which is what "the frown does not fire" has been each time.
-    function frownScore(b) {
-      return ((b.browDownLeft || 0) + (b.browDownRight || 0)) / 2;
-    }
+    // ----- What summoning has been, and why it is a head tilt -----
+    // It was a frown first, read from browDownLeft/browDownRight. MediaPipe
+    // reports those near zero on most frames for this reader, so the rise
+    // being measured was mostly noise. It was a gaze hold on the orb after
+    // that. Both are gone: summoning is now a head tilt, read from head-pose
+    // roll — a large, unambiguous movement that no blendshape is involved in.
+    // See THE HEAD TILT below.
 
     // Brow raise: the higher of two readings, not one composite.
     //
@@ -4738,23 +5275,6 @@
       return Math.max(inner, 0.4 * inner + 0.6 * outer);
     }
 
-    // ----- The frown is measured as a RISE, like the brow raise -----
-    // Same reasoning as GESTURE_BROW_ENTER below: browDown is not zero on a
-    // relaxed face, and how far from zero varies from reader to reader. An
-    // absolute threshold therefore means something different for every face —
-    // out of reach for some, permanently half-triggered for others.
-    //
-    // These are rise-above-resting thresholds, and they are LOW on purpose.
-    // This is the gesture for asking for help: it is worth far more as
-    // something reachable than as something precise, and the refractory period
-    // rather than the height of this number is what stops it repeating.
-    const GESTURE_FROWN_ENTER = 0.08;   // rise above resting to count as a frown
-    const GESTURE_FROWN_EXIT = 0.03;    // fall back under this to re-arm
-
-    // Same shape as the brow baseline below.
-    const FROWN_BASELINE_ALPHA = 0.02;
-    const FROWN_BASELINE_MIN_FRAMES = 30;
-
     // ----- The brow raise is measured as a RISE, not as a level -----
     // browInnerUp is not zero on a relaxed face. Depending on the reader's
     // features, their glasses, and how far they are looking up at the screen,
@@ -4767,46 +5287,28 @@
     //   - a reader whose rest is near 0.4 crosses 0.5 by blinking, and one
     //     whose rest is near 0.05 has to raise their brows to the ceiling.
     //
-    // So the threshold is applied to how far the brow has risen ABOVE that
-    // reader's own resting level, which browBaseline below tracks. A raise is
-    // a movement, and this is what makes it one.
-    const GESTURE_BROW_ENTER = 0.18;   // rise above resting to count as raised
-    const GESTURE_BROW_EXIT = 0.07;    // fall back under this to re-arm
+    // So BROW_MARGIN (at the top) is applied to how far the brow has risen
+    // ABOVE that reader's own resting level, which browBaseline below tracks.
+    // A raise is a movement, and this is what makes it one.
 
-    // How fast the resting level follows the face. Slow: it has to average out
-    // expressions without drifting up into a deliberate raise and cancelling
-    // it. It only updates while the brow is NOT raised (see stepBrowBaseline).
-    const BROW_BASELINE_ALPHA = 0.02;
-    // Nothing is measured until the baseline has seen this many relaxed
-    // frames, so the first second of tracking cannot fire the gesture.
+    // The brow's own baseline: the MEDIAN browRaiseScore over the last 30 seconds. Held
+    // raises are a minority of those frames, so they cannot pull the resting
+    // level up to meet themselves and cancel the gesture.
+    const BROW_BASELINE_WINDOW_MS = 30000;
+    // Nothing is measured until the window holds this many frames, so the
+    // first second of tracking cannot fire the gesture.
     const BROW_BASELINE_MIN_FRAMES = 30;
 
-    // Refractory is PER GESTURE. It used to be one shared constant, which
-    // meant the number chosen to stop the brow raise repeating also governed
-    // how soon a frown could ask for help again.
-    const GESTURE_FROWN_REFRACTORY_MS = 2500;
+    // Every number below belongs to the brow raise alone. They were once
+    // shared with other gestures, and every time one of those was tuned the
+    // brow moved with it — which is the whole reason for the separation rule.
     const GESTURE_BROW_REFRACTORY_MS = 2500;
-
-    // Hold times are PER GESTURE. They used to be one shared 400ms, which was
-    // chosen for the frown — a deliberate, sustained expression — and then
-    // applied to the brow raise, which is a flick lasting a couple of hundred
-    // milliseconds. A brow raise that has to survive 400ms above threshold is
-    // a brow raise most people cannot perform.
-    //
-    // The frown's own hold comes down from 400ms to 300ms. 400ms was set when
-    // the score was being attenuated by browInnerUp and every frown was
-    // marginal, so it was doing double duty as a second threshold; with the
-    // score no longer suppressed, 300ms is a deliberate expression and nothing
-    // less.
-    const GESTURE_FROWN_HOLD_MS = 300;
+    // A brow raise is a flick lasting a couple of hundred milliseconds, so its
+    // hold is a debounce and nothing more: one that had to survive 400ms was a
+    // brow raise most people cannot perform.
     const GESTURE_BROW_HOLD_MS = 120;    // ~3-4 frames: a debounce, not a hold
-
-    // Smoothing is PER GESTURE, for the same reason. This was one shared
-    // constant, and it was last tuned FOR THE BROW RAISE — dropped from 5
-    // frames to 2 because the brow's peak lasts only a few frames. The frown
-    // is a held expression whose problem is jitter, not peak loss, so it wants
-    // more averaging, not less; taking the brow's number was making it noisy.
-    const GESTURE_FROWN_SMOOTH_FRAMES = 3;
+    // Two frames, because the brow's peak lasts only a few and any wider mean
+    // drags it down.
     const GESTURE_BROW_SMOOTH_FRAMES = 2;
     // None at all for the blink. A blink is 100-150ms: 3-4 frames at 30fps,
     // with a peak that lasts one or two of them. ANY mean over neighbouring
@@ -4914,8 +5416,9 @@
     function makeGestureChannel(name, config) {
       return {
         name,
-        enter: config.enter,
-        exit: config.exit,
+        margin: config.margin,          // rise above baseline that fires it
+        rearmBand: config.rearmBand,    // return within this of baseline to re-arm
+        baseline: null,                 // this reader's resting level, for the log
         holdMs: config.holdMs,
         smoothFrames: config.smoothFrames,
         refractoryMs: config.refractoryMs,
@@ -4930,129 +5433,59 @@
       };
     }
 
-    const frownChannel = makeGestureChannel('frown', {
-      enter: GESTURE_FROWN_ENTER,
-      exit: GESTURE_FROWN_EXIT,
-      holdMs: GESTURE_FROWN_HOLD_MS,
-      smoothFrames: GESTURE_FROWN_SMOOTH_FRAMES,
-      refractoryMs: GESTURE_FROWN_REFRACTORY_MS,
-    });
     const browChannel = makeGestureChannel('brow', {
-      enter: GESTURE_BROW_ENTER,
-      exit: GESTURE_BROW_EXIT,
+      margin: BROW_MARGIN,
+      rearmBand: BROW_REARM_BAND,
       holdMs: GESTURE_BROW_HOLD_MS,
       smoothFrames: GESTURE_BROW_SMOOTH_FRAMES,
       refractoryMs: GESTURE_BROW_REFRACTORY_MS,
     });
 
-    // The reader's own resting brow, learned continuously.
+    // ===== THE ROLLING BASELINES =====
+    // Each gesture keeps its own 30-second window of its own raw score and
+    // takes the MEDIAN of it as this reader's resting level. Nothing is
+    // shared between the two: separate windows, separate constants, separate
+    // functions, as the separation rule above requires.
+    //
+    // Why a median, and why it never freezes: the baseline used to update
+    // only on frames where the signal was already below the exit threshold,
+    // which deadlocked — the face settles slightly high, the baseline refuses
+    // to learn, the rise never falls back into the re-arm band, and the
+    // gesture works exactly once per session. The window here takes EVERY
+    // frame unconditionally. A deliberate expression lasts a few hundred
+    // milliseconds against ~900 frames of window, so it is a handful of
+    // outliers at the top of the sort and the median does not move; a genuine
+    // change of posture or lighting fills the window within 30 seconds and
+    // the median follows it.
+
+    // Brow raise: its own window, its own median.
     let browBaseline = null;
     let browBaselineFrames = 0;
+    const browBaselineWindow = [];   // { t, v } for the last BROW_BASELINE_WINDOW_MS
 
-    // Returns how far the brow has risen above rest. The baseline only follows
-    // the face while the brow is DOWN — otherwise holding a raise would drag
-    // the baseline up to meet it and the gesture would cancel itself after a
-    // second or so.
-    function browRise(rawBrow) {
-      if (browBaseline === null) {
-        browBaseline = rawBrow;
-        browBaselineFrames = 1;
-        return 0;
+    function browRise(rawBrow, now) {
+      browBaselineWindow.push({ t: now, v: rawBrow });
+      while (browBaselineWindow.length
+        && now - browBaselineWindow[0].t > BROW_BASELINE_WINDOW_MS) {
+        browBaselineWindow.shift();
       }
+      browBaselineFrames = browBaselineWindow.length;
 
-      const rise = rawBrow - browBaseline;
-
-      // Only learn from frames that are not part of a raise. Below the exit
-      // threshold the brow is at rest by definition, which is exactly the
-      // signal the baseline wants.
-      if (rise < GESTURE_BROW_EXIT) {
-        browBaseline += (rawBrow - browBaseline) * BROW_BASELINE_ALPHA;
-        browBaselineFrames += 1;
-      }
+      const sorted = browBaselineWindow.map((sample) => sample.v).sort((a, b) => a - b);
+      const mid = sorted.length >> 1;
+      browBaseline = sorted.length % 2
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
 
       // Still learning: report no rise at all rather than a rise measured
-      // against a baseline that is one frame old.
+      // against a window of a handful of frames.
       if (browBaselineFrames < BROW_BASELINE_MIN_FRAMES) return 0;
-      return rise;
+      return rawBrow - browBaseline;
     }
 
-    // The frown's own resting level, learned the same way.
-    let frownBaseline = null;
-    let frownBaselineFrames = 0;
-
-    function frownRise(rawFrown) {
-      if (frownBaseline === null) {
-        frownBaseline = rawFrown;
-        frownBaselineFrames = 1;
-        return 0;
-      }
-      const rise = rawFrown - frownBaseline;
-      if (rise < GESTURE_FROWN_EXIT) {
-        frownBaseline += (rawFrown - frownBaseline) * FROWN_BASELINE_ALPHA;
-        frownBaselineFrames += 1;
-      }
-      if (frownBaselineFrames < FROWN_BASELINE_MIN_FRAMES) return 0;
-      return rise;
-    }
-
-    // ----- What your face actually produces, once a second -----
-    // Printed every second whether or not anything fires, because "the frown
-    // is broken" is not answerable without seeing the numbers it was judged
-    // on. Each line carries the raw blendshapes, the composite they make, this
-    // reader's learned resting level, the rise between them, the threshold
-    // that rise has to clear, and whether it cleared — plus the hold, which is
-    // the second thing a frown has to satisfy and the one that is invisible
-    // from the values alone.
-    //
-    // Both a LIVE reading (this instant) and the PEAK since the last line: a
-    // frown lasts a few hundred milliseconds, so a once-a-second snapshot on
-    // its own would usually miss it entirely.
-    const FROWN_REPORT_MS = 1000;
-    let frownReport = { since: 0, frames: 0, maxDownL: 0, maxDownR: 0, maxRaw: 0, maxRise: 0, maxInnerUp: 0 };
-
-    function reportFrownSpread(now, blend, raw, rise) {
-      if (frownReport.since === 0) frownReport.since = now;
-      frownReport.frames += 1;
-      frownReport.maxDownL = Math.max(frownReport.maxDownL, blend.browDownLeft || 0);
-      frownReport.maxDownR = Math.max(frownReport.maxDownR, blend.browDownRight || 0);
-      frownReport.maxInnerUp = Math.max(frownReport.maxInnerUp, blend.browInnerUp || 0);
-      frownReport.maxRaw = Math.max(frownReport.maxRaw, raw);
-      frownReport.maxRise = Math.max(frownReport.maxRise, rise);
-
-      if (now - frownReport.since < FROWN_REPORT_MS) return;
-
-      const f = (v) => (v === null || v === undefined ? '–' : v.toFixed(3));
-      const met = frownReport.maxRise >= GESTURE_FROWN_ENTER;
-      const holdText = frownChannel.runStart !== null
-        ? `holding ${Math.round(now - frownChannel.runStart)}/${GESTURE_FROWN_HOLD_MS}ms`
-        : `not holding (needs ${GESTURE_FROWN_HOLD_MS}ms above threshold)`;
-      const blockers = [];
-      if (!frownChannel.armed) blockers.push(`DISARMED — must fall below ${GESTURE_FROWN_EXIT} to re-arm`);
-      if (frownBaselineFrames < FROWN_BASELINE_MIN_FRAMES) {
-        blockers.push(`baseline still learning (${frownBaselineFrames}/${FROWN_BASELINE_MIN_FRAMES} frames)`);
-      }
-      const sinceFire = frownChannel.lastFireAt ? now - frownChannel.lastFireAt : Infinity;
-      if (sinceFire < GESTURE_FROWN_REFRACTORY_MS) {
-        blockers.push(`refractory ${((GESTURE_FROWN_REFRACTORY_MS - sinceFire) / 1000).toFixed(1)}s left`);
-      }
-
-      console.log(
-        `[frown] peak over ${FROWN_REPORT_MS}ms (${frownReport.frames} frames): ` +
-        `browDownL ${f(frownReport.maxDownL)} browDownR ${f(frownReport.maxDownR)} ` +
-        `-> score ${f(frownReport.maxRaw)} − rest ${f(frownBaseline)} = RISE ${f(frownReport.maxRise)} ` +
-        `vs threshold ${GESTURE_FROWN_ENTER} -> ` +
-        `${met ? 'MET' : 'NOT MET (short by ' + f(GESTURE_FROWN_ENTER - frownReport.maxRise) + ')'} ` +
-        `| now: score ${f(raw)} rise ${f(rise)} smoothed ${f(frownChannel.smoothed)} | ${holdText}` +
-        (blockers.length ? ` | BLOCKED: ${blockers.join('; ')}` : '') +
-        ` | browInnerUp ${f(frownReport.maxInnerUp)} (logged only — the frown no longer reads it)`);
-
-      frownReport = { since: now, frames: 0, maxDownL: 0, maxDownR: 0, maxRaw: 0, maxRise: 0, maxInnerUp: 0 };
-    }
-
-    // ----- The other two gestures, on the same cadence -----
-    // A separate function, a separate timer and separate numbers: the frown's
-    // line has to stay readable on its own, and nothing here may be derived
-    // from anything in the block above.
+    // ----- The two face gestures, once a second -----
+    // Its own function, its own timer and its own numbers: nothing here may be
+    // derived from anything the channels above run on.
     const GESTURE_REPORT_MS = 1000;
     let gestureReportAt = 0;
 
@@ -5061,19 +5494,23 @@
       gestureReportAt = now;
       const f = (v) => (v === null || v === undefined ? '–' : v.toFixed(3));
 
-      const browMet = browChannel.smoothed >= GESTURE_BROW_ENTER;
+      const browMet = browChannel.smoothed >= BROW_MARGIN;
       const browBlockers = [];
-      if (!browChannel.armed) browBlockers.push(`DISARMED — must fall below ${GESTURE_BROW_EXIT} to re-arm`);
+      if (!browChannel.armed) {
+        browBlockers.push(`DISARMED — must come back within ${BROW_REARM_BAND} of baseline to re-arm`);
+      }
       if (browBaselineFrames < BROW_BASELINE_MIN_FRAMES) {
-        browBlockers.push(`baseline still learning (${browBaselineFrames}/${BROW_BASELINE_MIN_FRAMES})`);
+        browBlockers.push(`baseline still learning ` +
+          `(${browBaselineFrames}/${BROW_BASELINE_MIN_FRAMES} frames of ` +
+          `${BROW_BASELINE_WINDOW_MS / 1000}s window)`);
       }
       const browSinceFire = browChannel.lastFireAt ? now - browChannel.lastFireAt : Infinity;
       if (browSinceFire < GESTURE_BROW_REFRACTORY_MS) {
         browBlockers.push(`refractory ${((GESTURE_BROW_REFRACTORY_MS - browSinceFire) / 1000).toFixed(1)}s`);
       }
       console.log(`[brow] rise ${f(browRiseNow)} smoothed ${f(browChannel.smoothed)} ` +
-        `vs threshold ${GESTURE_BROW_ENTER} -> ${browMet ? 'MET' : 'not met'} ` +
-        `(rest ${f(browBaseline)})` +
+        `vs margin ${BROW_MARGIN} -> ${browMet ? 'MET' : 'not met'} ` +
+        `(baseline ${f(browBaseline)}, 30s median over ${browBaselineFrames} frames)` +
         (browChannel.runStart !== null
           ? ` | holding ${Math.round(now - browChannel.runStart)}/${GESTURE_BROW_HOLD_MS}ms` : '') +
         (browBlockers.length ? ` | BLOCKED: ${browBlockers.join('; ')}` : '') +
@@ -5105,13 +5542,20 @@
     // `shapes` is the raw blendshape reading behind rawValue, logged with every
     // attempt so a misfire can be traced to the numbers that produced it rather
     // than to the composite alone.
-    function stepGestureChannel(channel, rawValue, now, shapes) {
+    function stepGestureChannel(channel, rawValue, now, baseline, shapes) {
+      channel.baseline = baseline;
       channel.smoothed = smoothInto(channel.history, rawValue, channel.smoothFrames);
       const value = channel.smoothed;
+      // Every attempt carries the baseline it was judged against AND the
+      // margin it had to clear, because a rise on its own says nothing about
+      // which of the two to tune.
+      const rest = baseline === null ? '(not learned yet)' : baseline.toFixed(3);
       const detail = `raw ${rawValue.toFixed(3)} smoothed ${value.toFixed(3)} ` +
-        `enter ${channel.enter} exit ${channel.exit} | ${shapes || '–'}`;
+        `baseline ${rest} margin ${channel.margin} band ${channel.rearmBand} | ${shapes || '–'}`;
 
-      if (value < channel.exit) {
+      // Back within a small band of the baseline — or below it, which is more
+      // relaxed still — counts as returned to rest, and re-arms the channel.
+      if (value <= channel.rearmBand) {
         if (channel.runStart !== null && channel.attemptLogged) {
           console.log(`[gesture] ${channel.name} ABANDONED after ` +
             `${Math.round(now - channel.runStart)}ms (needed ${channel.holdMs}ms) — ${detail}`);
@@ -5123,8 +5567,8 @@
         return false;
       }
 
-      if (!channel.armed || value < channel.enter) {
-        // In the band between exit and enter, or waiting to re-arm. Either way
+      if (!channel.armed || value < channel.margin) {
+        // Between the re-arm band and the margin, or waiting to re-arm. Either way
         // the hold is broken but the gesture is not released yet.
         channel.runStart = null;
         channel.runFrames = 0;
@@ -5145,7 +5589,7 @@
         // hold: with a 120ms hold there is no meaningful halfway, and an
         // attempt that is going to fail should leave its trace immediately.
         channel.attemptLogged = true;
-        console.log(`[gesture] ${channel.name} ATTEMPT — crossed ${channel.enter}, ` +
+        console.log(`[gesture] ${channel.name} ATTEMPT — rose ${channel.margin} above baseline, ` +
           `holding ${channel.holdMs}ms — ${detail}`);
       }
 
@@ -5164,7 +5608,7 @@
       console.log(`[gesture] ${channel.name} FIRED after ${Math.round(heldMs)}ms — ${detail}`);
       channel.refractoryLogged = false;
       channel.lastFireAt = now;
-      channel.armed = false;    // must relax below `exit` before it can fire again
+      channel.armed = false;    // must return within `rearmBand` of baseline to fire again
       channel.runStart = null;
       channel.runFrames = 0;
       channel.attemptLogged = false;
@@ -5201,7 +5645,6 @@
     function armGesturesForCard() {
       const signals = (typeof gaze !== 'undefined' && gazeEngineReady) ? gaze.getSignals() : null;
       const blend = (signals && signals.faceDetected && signals.blendshapes) ? signals.blendshapes : {};
-      const frown = frownBaseline === null ? 0 : frownScore(blend) - frownBaseline;
       // Compared as a rise, like everywhere else — comparing the raw level
       // against a rise threshold would disarm the channel on almost every
       // face and is what made the gesture unavailable when a card opened.
@@ -5210,9 +5653,8 @@
       // A channel already above its enter threshold stays disarmed on purpose:
       // a face caught mid-expression would otherwise fire instantly and dismiss
       // the card before it had been read.
-      frownChannel.armed = frown < frownChannel.enter;
-      browChannel.armed = brow < browChannel.enter;
-      for (const channel of [frownChannel, browChannel]) {
+      browChannel.armed = brow < browChannel.margin;
+      for (const channel of [browChannel]) {
         channel.runStart = null;
         channel.runFrames = 0;
         channel.attemptLogged = false;
@@ -5227,15 +5669,26 @@
       blinkPeakCompensated = 0;
       blinkPeakPose = null;
       lastBlinkEndedAt = 0;
-      console.log(`[gesture] armed for the card — frown ${frown.toFixed(3)} ` +
-        `(${frownChannel.armed ? 'ready' : 'waiting for it to relax'}), ` +
+      console.log(`[gesture] armed for the card — ` +
         `brow rise ${brow.toFixed(3)} over rest ` +
         `${browBaseline === null ? '(not learned yet)' : browBaseline.toFixed(3)} ` +
         `(${browChannel.armed ? 'ready' : 'waiting for it to relax'})`);
     }
 
+    // The tilt's own reset: a lost face must not let a half-completed tilt
+    // finish itself when the face comes back.
+    function resetTiltState() {
+      tiltChannel.armed = true;
+      tiltChannel.runStart = null;
+      tiltChannel.runFrames = 0;
+      tiltChannel.history = [];
+      tiltChannel.smoothed = 0;
+      tiltChannel.attemptLogged = false;
+    }
+
     function resetGestureState() {
-      for (const channel of [frownChannel, browChannel]) {
+      resetTiltState();
+      for (const channel of [browChannel]) {
         // Armed, not disarmed. A lost face is not a held expression: leaving
         // the channel disarmed meant it could only recover by falling below
         // its exit threshold, and a reader whose resting brow never went that
@@ -5291,13 +5744,13 @@
     // whether it was acted on, so a misfire can be traced to a number rather
     // than guessed at, and the thresholds above tuned against real readings.
     function fireGesture(name, value) {
-      // A frown works whenever; the other two mean something only while an
-      // offer or card is on screen.
-      const acted = name === 'frown' ? true : stuckMomentActive;
+      // Both of these mean something only while an offer or card is on
+      // screen. Summoning does not come through here at all — the head tilt
+      // calls summonHelp() directly, because it works with nothing on screen.
+      const acted = stuckMomentActive;
       lastGestureFlash = { name, at: performance.now(), acted };
 
-      const threshold = name === 'frown' ? GESTURE_FROWN_ENTER
-        : name === 'brow' ? GESTURE_BROW_ENTER
+      const threshold = name === 'brow' ? BROW_MARGIN
         : GESTURE_BLINK_ENTER;
 
       // The blendshapes behind this fire, so a misfire is traceable to the
@@ -5311,18 +5764,12 @@
         `browDown L ${f3(liveBlend.browDownLeft)} R ${f3(liveBlend.browDownRight)} ` +
         `blink L ${f3(liveBlend.eyeBlinkLeft)} R ${f3(liveBlend.eyeBlinkRight)}`;
       const what = !acted ? 'ignored, nothing on screen'
-        : name === 'frown' ? 'summon'
         : name === 'brow' ? 'DISMISS'
         : helpStage === 'offer' ? 'ACCEPT'
         : 'ignored, already accepted';
       console.log(`[gesture] ${name} — score ${value.toFixed(3)} (threshold ${threshold}), ` +
         `stage ${helpStage || 'none'} -> ${what} | ${shapes}`);
       if (!acted) return;
-
-      if (name === 'frown') {
-        summonHelp();
-        return;
-      }
 
       // ----- One gesture, one meaning, at every stage -----
       // The brow raise is the ONLY thing that dismisses. It works at the
@@ -5368,9 +5815,9 @@
       const now = performance.now();
       // Falls back to the middle of the window when there is no gaze fix, so
       // the demo works in mouse mode and before any calibration.
-      const captureX = clamp(smoothedGazeX === null ? window.innerWidth / 2 : smoothedGazeX,
+      const captureX = clamp(smoothedGazeX === null ? window.innerWidth / 2 : toViewportX(smoothedGazeX),
         ORB_RADIUS, window.innerWidth - ORB_RADIUS);
-      const captureY = clamp(smoothedGazeY === null ? window.innerHeight / 2 : smoothedGazeY,
+      const captureY = clamp(smoothedGazeY === null ? window.innerHeight / 2 : toViewportY(smoothedGazeY),
         ORB_RADIUS, window.innerHeight - ORB_RADIUS);
 
       console.log(`[demo] forcing a stuck event at (${Math.round(captureX)}, ${Math.round(captureY)}) — ` +
@@ -5399,19 +5846,19 @@
       });
     }
 
-    // Opens an offer with no detector behind it. The frown is the only way to
-    // ask for help before IRIS has decided anything, so it deliberately ignores
-    // the cooldown — the reader asking outright outranks a rule about not
-    // nagging them.
-    function summonHelp() {
+    // Opens an offer with no detector behind it. This is how the reader asks
+    // for help before IRIS has decided anything — the head tilt below, or
+    // Cmd/Ctrl+Shift+H — so it ignores the cooldown: the reader asking
+    // outright outranks a rule about not nagging them.
+    function summonHelp(source) {
       if (stuckMomentActive) {
-        console.log('[gesture] frown ignored — a card is already open.');
+        console.log(`[summon] ${source || 'manual'} ignored — a card is already open.`);
         return;
       }
-      console.log('[gesture] frown — summoning help manually.');
-      const captureX = clamp(smoothedGazeX === null ? window.innerWidth / 2 : smoothedGazeX,
+      console.log(`[summon] ${source || 'manual'} — summoning help.`);
+      const captureX = clamp(smoothedGazeX === null ? window.innerWidth / 2 : toViewportX(smoothedGazeX),
         ORB_RADIUS, window.innerWidth - ORB_RADIUS);
-      const captureY = clamp(smoothedGazeY === null ? window.innerHeight / 2 : smoothedGazeY,
+      const captureY = clamp(smoothedGazeY === null ? window.innerHeight / 2 : toViewportY(smoothedGazeY),
         ORB_RADIUS, window.innerHeight - ORB_RADIUS);
 
       orbCore.className = 'state-stuck';
@@ -5424,18 +5871,125 @@
         anchorX: captureX,
         anchorY: captureY,
         helpShown: true,
-        trigger: { condition: 'summoned', summonedByFrown: true },
+        trigger: { condition: 'summoned', summonedBy: source || 'manual' },
       });
       beginStuckOffer({
         eventId,
         gazeX: captureX,
         gazeY: captureY,
         baseline: captureVerificationBaseline(performance.now(), captureX, captureY),
+        // Tags the offer as the reader's own request, which is what keeps
+        // auto-clear off it and keeps it out of the adaptive counter.
+        summonedBy: source || 'manual',
       });
       if (zoneLogging) {
         window.iris.writeZoneLogRow(zoneLogSnapshot('SUMMONED'));
         zoneLogRowsWritten += 1;
       }
+    }
+
+    // ===== THE HEAD TILT — how help is summoned =====
+    // Roll only. No blendshape is read here at all, which is the point: the
+    // two expressions this used to be (a frown, then a gaze hold) both failed
+    // on signals that were near-zero or too imprecise for this reader, and a
+    // head tilt is a large movement the pose estimator reports directly.
+    //
+    // Everything below belongs to the tilt alone — its own constants, its own
+    // baseline window, its own channel — as the separation rule requires.
+    const TILT_HOLD_MS = 500;             // must stay tilted this long to count
+    const TILT_SMOOTH_FRAMES = 3;         // roll is jittery frame to frame
+    const TILT_REFRACTORY_MS = 3000;      // ...before another tilt can summon again
+    const TILT_BASELINE_WINDOW_MS = 30000;
+    const TILT_BASELINE_MIN_FRAMES = 30;
+
+    // ----- Reading roll as a signed angle from level -----
+    // atan2 wraps, so depending on the sign convention of the rotation matrix
+    // a level head reads as ~0 OR as ~±180°. Folding the far case back keeps
+    // the SIGN of the tilt (which side the head went) while putting level at
+    // zero either way — the same fold levelDeviation() does for the blink's
+    // pose gain, done separately here because nothing may be shared between
+    // detectors.
+    function rollDegrees(pose) {
+      if (!pose || pose.roll === undefined || pose.roll === null) return null;
+      let deg = pose.roll * 180 / Math.PI;
+      if (deg > 90) deg -= 180;
+      else if (deg < -90) deg += 180;
+      return deg;
+    }
+
+    // The reader's own resting roll: the MEDIAN over the last 30 seconds. A
+    // median rather than a mean because a deliberate tilt is a fraction of the
+    // window's frames and a median ignores it however long it is held, so the
+    // baseline cannot creep toward the tilt and cancel the gesture.
+    let tiltBaselineDeg = null;
+    let tiltBaselineFrames = 0;
+    let lastRollDeg = null;
+    const tiltBaselineWindow = [];   // { t, v } for the last TILT_BASELINE_WINDOW_MS
+
+    // Returns how far the head is tilted from rest, in degrees, unsigned: a
+    // tilt to either side summons help, so only the size matters downstream.
+    function tiltFromRest(rollDeg, now) {
+      tiltBaselineWindow.push({ t: now, v: rollDeg });
+      while (tiltBaselineWindow.length
+        && now - tiltBaselineWindow[0].t > TILT_BASELINE_WINDOW_MS) {
+        tiltBaselineWindow.shift();
+      }
+      tiltBaselineFrames = tiltBaselineWindow.length;
+
+      const sorted = tiltBaselineWindow.map((sample) => sample.v).sort((a, b) => a - b);
+      const mid = sorted.length >> 1;
+      tiltBaselineDeg = sorted.length % 2
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+
+      // Still learning: report no tilt rather than one measured against a
+      // window of a handful of frames.
+      if (tiltBaselineFrames < TILT_BASELINE_MIN_FRAMES) return 0;
+      return Math.abs(rollDeg - tiltBaselineDeg);
+    }
+
+    // The tilt runs through the same channel machinery as the brow raise —
+    // smooth, cross the margin, hold, fire, then refuse to fire again until it
+    // has returned near the baseline — but on its own constants throughout.
+    const tiltChannel = makeGestureChannel('tilt', {
+      margin: TILT_MARGIN_DEG,
+      rearmBand: TILT_REARM_BAND_DEG,
+      holdMs: TILT_HOLD_MS,
+      smoothFrames: TILT_SMOOTH_FRAMES,
+      refractoryMs: TILT_REFRACTORY_MS,
+    });
+
+    // ----- What the head is actually doing, once a second -----
+    // The three numbers needed to tune this: the roll right now, the resting
+    // roll it is judged against, and the margin between them that fires it.
+    const TILT_REPORT_MS = 1000;
+    let tiltReportAt = 0;
+
+    function reportTilt(now, rollDeg, tiltNow) {
+      if (now - tiltReportAt < TILT_REPORT_MS) return;
+      tiltReportAt = now;
+      const d = (v) => (v === null || v === undefined ? '–' : v.toFixed(1));
+      const blockers = [];
+      if (!tiltChannel.armed) {
+        blockers.push(`DISARMED — must come back within ${TILT_REARM_BAND_DEG}° of rest to re-arm`);
+      }
+      if (tiltBaselineFrames < TILT_BASELINE_MIN_FRAMES) {
+        blockers.push(`baseline still learning ` +
+          `(${tiltBaselineFrames}/${TILT_BASELINE_MIN_FRAMES} frames of ` +
+          `${TILT_BASELINE_WINDOW_MS / 1000}s window)`);
+      }
+      const sinceFire = tiltChannel.lastFireAt ? now - tiltChannel.lastFireAt : Infinity;
+      if (sinceFire < TILT_REFRACTORY_MS) {
+        blockers.push(`refractory ${((TILT_REFRACTORY_MS - sinceFire) / 1000).toFixed(1)}s left`);
+      }
+      console.log(
+        `[tilt] roll ${d(rollDeg)}° − rest ${d(tiltBaselineDeg)}° = ${d(tiltNow)}° ` +
+        `vs margin ${TILT_MARGIN_DEG}° -> ${tiltNow >= TILT_MARGIN_DEG ? 'MET' : 'not met'} ` +
+        `| smoothed ${d(tiltChannel.smoothed)}° ` +
+        (tiltChannel.runStart !== null
+          ? `| holding ${Math.round(now - tiltChannel.runStart)}/${TILT_HOLD_MS}ms `
+          : `| not holding (needs ${TILT_HOLD_MS}ms past the margin) `) +
+        (blockers.length ? `| BLOCKED: ${blockers.join('; ')}` : ''));
     }
 
     function updateGestureControls(now) {
@@ -5453,30 +6007,42 @@
         return;
       }
 
+      // ----- Head tilt: summon -----
+      // First, and on its own inputs: roll from the head pose, nothing else.
+      lastRollDeg = rollDegrees(signals.headPose);
+      if (lastRollDeg === null) {
+        resetTiltState();
+      } else {
+        const tiltNow = tiltFromRest(lastRollDeg, now);
+        reportTilt(now, lastRollDeg, tiltNow);
+        const tiltShapes = `roll ${lastRollDeg.toFixed(1)}° ` +
+          `rest ${tiltBaselineDeg === null ? '–' : tiltBaselineDeg.toFixed(1)}° ` +
+          `tilt ${tiltNow.toFixed(1)}° margin ${TILT_MARGIN_DEG}°` +
+          `${tiltBaselineFrames < TILT_BASELINE_MIN_FRAMES ? ' [baseline still learning]' : ''}`;
+        if (stepGestureChannel(tiltChannel, tiltNow, now, tiltBaselineDeg, tiltShapes)) {
+          // Summoning is not answering a card, so it does not go through
+          // fireGesture — it works whether or not anything is on screen.
+          console.log(`[summon] head tilt — ${tiltChannel.smoothed.toFixed(1)}° ` +
+            `over a resting ${tiltBaselineDeg === null ? '–' : tiltBaselineDeg.toFixed(1)}°`);
+          lastGestureFlash = { name: 'tilt', at: now, acted: !stuckMomentActive };
+          summonHelp('head tilt');
+        }
+      }
+
       // ----- Composite signals -----
       const blend = signals.blendshapes || {};
-      const frownRaw = frownScore(blend);
       const browRaw = browRaiseScore(blend);
 
       const f3 = (v) => (v || 0).toFixed(3);
-      // The rise above this reader's own resting furrow — see frownRise.
-      const frownRiseNow = frownRise(frownRaw);
-      reportFrownSpread(now, blend, frownRaw, frownRiseNow);
-      const frownShapes = `browDownL ${f3(blend.browDownLeft)} browDownR ${f3(blend.browDownRight)} ` +
-        `browInnerUp ${f3(blend.browInnerUp)} ` +
-        `| score ${f3(frownRaw)} rest ${f3(frownBaseline)} rise ${f3(frownRiseNow)}`;
       // The rise above this reader's own resting brow — see browRise. The
       // channel thresholds are rise thresholds, so this is what it is fed.
-      const browRiseNow = browRise(browRaw);
+      const browRiseNow = browRise(browRaw, now);
       const browShapes = `browInnerUp ${f3(blend.browInnerUp)} ` +
         `browOuterUpL ${f3(blend.browOuterUpLeft)} browOuterUpR ${f3(blend.browOuterUpRight)} ` +
         `| score ${f3(browRaw)} rest ${f3(browBaseline)} rise ${f3(browRiseNow)}` +
         `${browBaselineFrames < BROW_BASELINE_MIN_FRAMES ? ' [baseline still learning]' : ''}`;
 
-      if (stepGestureChannel(frownChannel, frownRiseNow, now, frownShapes)) {
-        fireGesture('frown', frownChannel.smoothed);
-      }
-      if (stepGestureChannel(browChannel, browRiseNow, now, browShapes)) {
+      if (stepGestureChannel(browChannel, browRiseNow, now, browBaseline, browShapes)) {
         fireGesture('brow', browChannel.smoothed);
       }
 
@@ -5601,18 +6167,19 @@
         `browOuterUp L ${f2(blend.browOuterUpLeft)} R ${f2(blend.browOuterUpRight)}`,
         `blink L ${f2(blinkLeftRaw)}->${f2(blinkLeft)} R ${f2(blinkRightRaw)}->${f2(blinkRight)}` +
           `/${GESTURE_BLINK_ENTER} (pose gain ${gain.toFixed(2)}, offAxis ${deg(offAxis)}°)`,
-        `FROWN rise ${frownChannel.smoothed.toFixed(3)}/${GESTURE_FROWN_ENTER} ` +
-          `(rest ${frownBaseline === null ? '–' : frownBaseline.toFixed(2)})` +
-          `${frownChannel.armed ? '' : ' REARM'}` +
-          (frownChannel.runStart !== null ? ` held ${Math.round(now - frownChannel.runStart)}/${frownChannel.holdMs}ms` : ''),
-        `BROW rise ${browChannel.smoothed.toFixed(3)}/${GESTURE_BROW_ENTER} ` +
+        `TILT ${tiltChannel.smoothed.toFixed(1)}°/${TILT_MARGIN_DEG}° ` +
+          `(rest ${tiltBaselineDeg === null ? '–' : tiltBaselineDeg.toFixed(1)}°)` +
+          `${tiltChannel.armed ? '' : ' REARM'}` +
+          (tiltChannel.runStart !== null
+            ? ` held ${Math.round(now - tiltChannel.runStart)}/${tiltChannel.holdMs}ms` : ''),
+        `BROW rise ${browChannel.smoothed.toFixed(3)}/${BROW_MARGIN} ` +
           `(rest ${browBaseline === null ? '–' : browBaseline.toFixed(2)})` +
           `${browChannel.armed ? '' : ' REARM'}` +
           (browChannel.runStart !== null ? ` held ${Math.round(now - browChannel.runStart)}/${browChannel.holdMs}ms` : ''),
       ];
       if (eyesClosedSince !== null) parts.push(`closed ${Math.round(now - eyesClosedSince)}ms`);
       if (lastBlinkEndedAt) parts.push(`1st blink ${Math.round(now - lastBlinkEndedAt)}ms ago`);
-      for (const channel of [frownChannel, browChannel]) {
+      for (const channel of [tiltChannel, browChannel]) {
         const since = now - channel.lastFireAt;
         if (channel.lastFireAt && since < channel.refractoryMs) {
           parts.push(`${channel.name} refractory ${((channel.refractoryMs - since) / 1000).toFixed(1)}s`);
@@ -5624,8 +6191,87 @@
       debugGestureControl.textContent = parts.join(' | ');
     }
 
+    // ===== One live status line, once a second =====
+    // Read-only. It computes nothing the detectors use, writes nothing back,
+    // and touches no threshold — every number below is read from the variables
+    // the gesture channels and the stuck detector are already running on.
+    const STATUS_LINE_MS = 1000;
+    let statusLineAt = 0;
+
+    function logLiveStatus(now) {
+      if (now - statusLineAt < STATUS_LINE_MS) return;
+      statusLineAt = now;
+
+      const n = (v, digits = 3) => (v === null || v === undefined || Number.isNaN(v)
+        ? '–' : Number(v).toFixed(digits));
+      const mark = (crossed) => (crossed ? 'CROSSED' : 'below');
+
+      // ----- Gestures -----
+      const signals = (typeof gaze !== 'undefined' && gazeEngineReady) ? gaze.getSignals() : null;
+      const face = !!(signals && signals.faceDetected);
+      const blend = (face && signals.blendshapes) ? signals.blendshapes : {};
+
+      const browNow = browChannel.smoothed;
+
+      // Recomputed here from the same inputs the blink gate uses, rather than
+      // read out of the gate — this line must never be able to disturb it.
+      const gain = blinkPoseGain(signals ? signals.headPose : null).gain;
+      const blinkL = Math.min(1, (signals ? signals.blinkLeft : 0) * gain);
+      const blinkR = Math.min(1, (signals ? signals.blinkRight : 0) * gain);
+
+      const gestures =
+        `TILT ${n(tiltChannel.smoothed, 1)}°/${TILT_MARGIN_DEG}° ` +
+        `${mark(tiltChannel.smoothed >= TILT_MARGIN_DEG)} ` +
+        `[roll ${n(lastRollDeg, 1)}° rest ${n(tiltBaselineDeg, 1)}°` +
+        `${tiltChannel.armed ? '' : ' DISARMED'}]` +
+        `  ·  BROW ${n(browNow)}/${BROW_MARGIN} ${mark(browNow >= BROW_MARGIN)} ` +
+        `[innerUp ${n(blend.browInnerUp)} outerL ${n(blend.browOuterUpLeft)} ` +
+        `outerR ${n(blend.browOuterUpRight)} rest ${n(browBaseline)}` +
+        `${browChannel.armed ? '' : ' DISARMED'}]` +
+        `  ·  BLINK L ${n(blinkL)} R ${n(blinkR)} /${GESTURE_BLINK_ENTER} ` +
+        `${mark(blinkL >= GESTURE_BLINK_ENTER && blinkR >= GESTURE_BLINK_ENTER)} ` +
+        `[raw L ${n(blend.eyeBlinkLeft)} R ${n(blend.eyeBlinkRight)} poseGain ${n(gain, 2)}]`;
+
+      // ----- Detector -----
+      const ratio = (progressMedian && progressMedian > 0)
+        ? cachedProgress / progressMedian : null;
+      const heldMs = progressHeldSince === null ? 0 : now - progressHeldSince;
+      const detector =
+        `progress ${cachedProgress} / median ${n(progressMedian, 2)} = ` +
+        `ratio ${n(ratio, 2)} vs ${STUCK_PROGRESS_RATIO} ` +
+        `${ratio !== null && ratio < STUCK_PROGRESS_RATIO ? 'QUALIFYING' : 'not qualifying'}  ·  ` +
+        `sustain ${(heldMs / 1000).toFixed(1)}s / ${(currentSustainMs / 1000).toFixed(1)}s`;
+
+      // ----- What is holding a fire back -----
+      // The same gates the detector checks, in the same order it checks them,
+      // reported as the FIRST one that is closed — that is the one actually
+      // blocking, and listing the rest alongside it only buries it.
+      const cooldownLeft = helpCooldownUntil - Date.now();
+      const contentSettledMs = now - lastContentChangeAt;
+      let blocking;
+      if (stuckMomentActive) blocking = 'an offer is already open';
+      else if (!face) blocking = 'no face detected';
+      else if (idleReason !== null) blocking = `idle — ${idleReason}`;
+      else if (sessionActiveMs < STUCK_WARMUP_MS) {
+        blocking = `warm-up — ${((STUCK_WARMUP_MS - sessionActiveMs) / 1000).toFixed(0)}s of ` +
+          `${(STUCK_WARMUP_MS / 1000).toFixed(0)}s left`;
+      } else if (cooldownLeft > 0) blocking = `cooldown — ${(cooldownLeft / 1000).toFixed(0)}s left`;
+      else if (contentSettledMs < CONTENT_CHANGE_BLOCK_MS) {
+        blocking = `content still settling — ${((CONTENT_CHANGE_BLOCK_MS - contentSettledMs) / 1000).toFixed(1)}s`;
+      } else if (progressMedian === null || progressMedian < STUCK_MEDIAN_MIN) {
+        blocking = `no usable median yet (have ${n(progressMedian, 2)}, need >= ${STUCK_MEDIAN_MIN})`;
+      } else if (ratio === null || ratio >= STUCK_PROGRESS_RATIO) {
+        blocking = `progress ratio ${n(ratio, 2)} is not below ${STUCK_PROGRESS_RATIO}`;
+      } else if (heldMs < currentSustainMs) {
+        blocking = `sustain — ${((currentSustainMs - heldMs) / 1000).toFixed(1)}s more of it holding`;
+      } else blocking = 'nothing — a fire is due';
+
+      console.log(`[status] ${gestures}\n         ${detector}\n         BLOCKING: ${blocking}`);
+    }
+
     function gestureLoop(now) {
       updateGestureControls(now);
+      logLiveStatus(now);
       requestAnimationFrame(gestureLoop);
     }
     requestAnimationFrame(gestureLoop);
@@ -6285,11 +6931,15 @@
       // while doing nothing with it. wireSettingControls() is idempotent.
       wireSettingControls();
       renderSettingsPanel();
+      // ----- Overview -----
+      renderSummarySentence(events);
       renderTodayPanel(events);
+      renderFatiguePanel(events);
+      renderGoalsPanel();
       renderDifficultyPanel(events);
+      renderRevisionPanel(events);
       renderTimelinePanel(events);
       renderHelpHistoryPanel(events);
-      renderRevisionPanel(events);
     }
 
     // ----- 7. Settings -----
@@ -6422,52 +7072,460 @@
       console.log(`[settings] reset to defaults — detector now ${liveDetectorValues()}`);
     });
 
-    // ----- 1. Today -----
+    // ----- Per-day metrics -----
+    // Every number on the Overview cards comes from this one function, so the
+    // hero figure, the sparkline behind it and the delta beside it can never
+    // disagree about what a day contained.
+    function metricsForDay(events, date) {
+      const dayEvents = events.filter((e) => isSameLocalDay(new Date(e.startTime), date));
+      if (dayEvents.length === 0) {
+        return { hours: 0, sessions: 0, focus: null, events: 0, resolved: 0, activeMs: 0 };
+      }
+      const sessions = groupIntoSessions(dayEvents);
+      const activeMs = sessions.reduce((sum, session) => {
+        const start = session[0].startTime;
+        const end = Math.max(...session.map(getEventEnd));
+        return sum + (end - start);
+      }, 0);
+      const struggleMs = dayEvents.reduce((sum, e) => sum + getEventDurationMs(e), 0);
+      return {
+        hours: activeMs / 3600000,
+        sessions: sessions.length,
+        focus: activeMs > 0 ? Math.max(0, Math.min(1, 1 - struggleMs / activeMs)) : null,
+        events: dayEvents.length,
+        resolved: dayEvents.filter((e) => e.resolved === true).length,
+        activeMs,
+      };
+    }
+
+    // Oldest first, today last — the order a sparkline is read in.
+    function lastSevenDays(events) {
+      const out = [];
+      for (let back = 6; back >= 0; back--) {
+        const date = new Date();
+        date.setDate(date.getDate() - back);
+        out.push(metricsForDay(events, date));
+      }
+      return out;
+    }
+
+    // ----- Sparklines -----
+    // Drawn straight into the inline <svg> already in the markup rather than
+    // through a charting library: seven points and a fill, which is less code
+    // than configuring anything would be.
+    function drawSparkline(svgId, values) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      const w = 100;
+      const h = svg.id === 'spark-hours' ? 34 : 24;
+      const max = Math.max(...values, 0);
+      const min = Math.min(...values, 0);
+      const span = max - min || 1;
+      const step = values.length > 1 ? w / (values.length - 1) : w;
+      const points = values.map((v, i) => {
+        const x = i * step;
+        // 2px of padding top and bottom so a peak is not clipped by the edge.
+        const y = h - 2 - ((v - min) / span) * (h - 4);
+        return [x, y];
+      });
+      const line = points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+      const area = `0,${h} ` + line + ` ${w},${h}`;
+      const last = points[points.length - 1];
+      const gradientId = `${svgId}-grad`;
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.32"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <polygon points="${area}" fill="url(#${gradientId})"/>
+        <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="1.6"
+          stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6"
+          fill="var(--accent-glow)" stroke="var(--panel-bg)" stroke-width="1.2"
+          vector-effect="non-scaling-stroke"/>
+      `;
+    }
+
+    // ----- Deltas -----
+    // `higherIsBetter` is false for "events triggered": more stuck moments than
+    // yesterday is not an improvement, and colouring it green would say it was.
+    function renderDelta(elementId, today, yesterday, format, higherIsBetter = true) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.classList.remove('up', 'down', 'flat');
+      if (today === null || yesterday === null || yesterday === undefined) {
+        el.textContent = 'no comparison yet';
+        el.classList.add('flat');
+        return;
+      }
+      const change = today - yesterday;
+      const better = higherIsBetter ? change > 0 : change < 0;
+      if (Math.abs(change) < 1e-9) {
+        el.textContent = 'same as yesterday';
+        el.classList.add('flat');
+        return;
+      }
+      el.classList.add(better ? 'up' : 'down');
+      el.textContent = `${change > 0 ? '▲' : '▼'} ${format(Math.abs(change))} vs yesterday`;
+    }
+
+    // ----- 1. The summary sentence -----
+    // Assembled from clauses that are each dropped when there is nothing to say,
+    // so it never claims a pattern the data does not contain.
+    function renderSummarySentence(events) {
+      const el = document.getElementById('summary-sentence');
+      if (!el) return;
+
+      if (events.length === 0) {
+        el.textContent = 'Nothing recorded yet — once IRIS catches its first stuck moment, ' +
+          'this is where the shape of your session shows up.';
+        return;
+      }
+
+      const today = metricsForDay(events, new Date());
+      const clauses = [];
+
+      if (today.events > 0) {
+        clauses.push(`You studied ${today.hours.toFixed(1)} hour${today.hours === 1 ? '' : 's'} ` +
+          `across ${today.sessions} session${today.sessions === 1 ? '' : 's'}`);
+      } else {
+        const totalMs = groupIntoSessions(events).reduce((sum, session) => {
+          const start = session[0].startTime;
+          return sum + (Math.max(...session.map(getEventEnd)) - start);
+        }, 0);
+        clauses.push(`Nothing recorded today; across everything stored you have ` +
+          `${(totalMs / 3600000).toFixed(1)} hours in ${groupIntoSessions(events).length} sessions`);
+      }
+
+      // The topic with the most unresolved struggles, over all time — a single
+      // day rarely has enough labelled events to rank anything.
+      const byTopic = new Map();
+      events.filter((e) => e.topic).forEach((e) => {
+        const stats = byTopic.get(e.topic) || { total: 0, unresolved: 0 };
+        stats.total += 1;
+        if (e.resolved !== true) stats.unresolved += 1;
+        byTopic.set(e.topic, stats);
+      });
+      const hardest = [...byTopic.entries()]
+        .sort((a, b) => (b[1].unresolved - a[1].unresolved) || (b[1].total - a[1].total))[0];
+      if (hardest && hardest[1].unresolved > 0) {
+        clauses.push(`struggled most with ${hardest[0]}`);
+      }
+
+      // Where the fatigue curve peaks, in whole minutes into a session.
+      const peak = fatiguePeakMinutes(events);
+      if (peak !== null) {
+        clauses.push(`and your focus dipped after ${peak} minutes`);
+      }
+
+      el.textContent = clauses.join(', ').replace(/, and /, ' and ') + '.';
+    }
+
+    // ----- 2. Today, with hierarchy -----
     function renderTodayPanel(events) {
-      const today = new Date();
-      const todayEvents = events.filter((e) => isSameLocalDay(new Date(e.startTime), today));
-
-      const statHours = document.getElementById('stat-hours');
-      const statFocus = document.getElementById('stat-focus');
-      const statEvents = document.getElementById('stat-events');
-      const statResolved = document.getElementById('stat-resolved');
+      const week = lastSevenDays(events);
+      const today = week[week.length - 1];
+      const yesterday = week[week.length - 2];
       const emptyEl = document.getElementById('today-empty');
+      setEmptyState(emptyEl, today.events === 0);
 
-      if (todayEvents.length === 0) {
-        statHours.textContent = '0.0';
-        statFocus.textContent = '–';
-        statEvents.textContent = '0';
-        statResolved.textContent = '0';
+      const set = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      };
+      set('stat-hours', today.hours.toFixed(1));
+      set('stat-sessions', String(today.sessions));
+      set('stat-focus', today.focus === null ? '–' : `${Math.round(today.focus * 100)}%`);
+      set('stat-events', String(today.events));
+      set('stat-resolved', String(today.resolved));
+
+      drawSparkline('spark-hours', week.map((d) => d.hours));
+      drawSparkline('spark-sessions', week.map((d) => d.sessions));
+      drawSparkline('spark-focus', week.map((d) => (d.focus === null ? 0 : d.focus * 100)));
+      drawSparkline('spark-events', week.map((d) => d.events));
+      drawSparkline('spark-resolved', week.map((d) => d.resolved));
+
+      renderDelta('delta-hours', today.hours, yesterday.hours, (v) => `${v.toFixed(1)}h`);
+      renderDelta('delta-sessions', today.sessions, yesterday.sessions, (v) => `${v}`);
+      renderDelta('delta-focus', today.focus === null ? null : today.focus * 100,
+        yesterday.focus === null ? null : yesterday.focus * 100, (v) => `${Math.round(v)}%`);
+      renderDelta('delta-events', today.events, yesterday.events, (v) => `${v}`, false);
+      renderDelta('delta-resolved', today.resolved, yesterday.resolved, (v) => `${v}`);
+    }
+
+    // ----- 3. Fatigue curve -----
+    // Every stuck moment placed by how far into ITS OWN session it happened,
+    // with all sessions laid over one another. One session says nothing; fifty
+    // of them stacked say when attention actually gives out.
+    const FATIGUE_BUCKET_MIN = 5;      // minutes per bucket
+    const FATIGUE_MAX_MIN = 180;       // three hours; anything past this folds into the last bucket
+
+    function fatigueBuckets(events) {
+      const count = Math.ceil(FATIGUE_MAX_MIN / FATIGUE_BUCKET_MIN);
+      const buckets = new Array(count).fill(0);
+      const interventions = [];
+      let plotted = 0;
+
+      for (const session of groupIntoSessions(events)) {
+        const start = session[0].startTime;
+        for (const event of session) {
+          const minutes = Math.max(0, (event.startTime - start) / 60000);
+          const index = Math.min(count - 1, Math.floor(minutes / FATIGUE_BUCKET_MIN));
+          buckets[index] += 1;
+          plotted += 1;
+          // An intervention is help that was actually given — the offer was
+          // accepted and something came back — not merely an offer shown.
+          if (event.helpText || event.outcome === 'accepted') {
+            interventions.push({ minutes: Math.min(minutes, FATIGUE_MAX_MIN), event });
+          }
+        }
+      }
+      return { buckets, interventions, plotted, count };
+    }
+
+    // The bucket with the most struggles, expressed as the minute it starts at.
+    // Used by the summary sentence as well as the chart, so both name the same
+    // moment.
+    function fatiguePeakMinutes(events) {
+      const { buckets, plotted } = fatigueBuckets(events);
+      if (plotted < 3) return null;
+      let best = 0;
+      for (let i = 1; i < buckets.length; i++) if (buckets[i] > buckets[best]) best = i;
+      if (buckets[best] === 0) return null;
+      return best * FATIGUE_BUCKET_MIN;
+    }
+
+    function renderFatiguePanel(events) {
+      const host = document.getElementById('fatigue-chart');
+      const emptyEl = document.getElementById('fatigue-empty');
+      if (!host) return;
+
+      const { buckets, interventions, plotted, count } = fatigueBuckets(events);
+      if (plotted === 0) {
+        host.innerHTML = '';
         setEmptyState(emptyEl, true);
         return;
       }
       setEmptyState(emptyEl, false);
 
-      // "Hours studied" = total span of today's sessions (first event's
-      // start to the last event's end within each session), summed — an
-      // estimate of active time, not just time spent stuck.
-      // "Focus ratio" = the share of that active time that WASN'T spent
-      // stuck — i.e. 1 minus (struggle time / active time). Neither of
-      // these is a field we store directly; both are derived here from
-      // event timestamps, since the app doesn't track continuous
-      // CALM time anywhere persistent.
-      const sessions = groupIntoSessions(todayEvents);
-      const totalSessionMs = sessions.reduce((sum, session) => {
-        const start = session[0].startTime;
-        const end = Math.max(...session.map(getEventEnd));
-        return sum + (end - start);
-      }, 0);
-      const struggleMs = todayEvents.reduce((sum, e) => sum + getEventDurationMs(e), 0);
-      const focusRatio = totalSessionMs > 0
-        ? Math.max(0, Math.min(1, 1 - struggleMs / totalSessionMs))
-        : 0;
-      const resolvedCount = todayEvents.filter((e) => e.resolved === true).length;
+      // A fixed viewBox with preserveAspectRatio="none" would stretch the
+      // markers into ovals, so the chart is drawn in its own coordinate space
+      // and scaled uniformly instead.
+      const W = 1000;
+      const H = 340;
+      const padL = 44;
+      const padR = 20;
+      const padT = 24;
+      const padB = 40;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
 
-      statHours.textContent = formatHours(totalSessionMs);
-      statFocus.textContent = `${Math.round(focusRatio * 100)}%`;
-      statEvents.textContent = String(todayEvents.length);
-      statResolved.textContent = String(resolvedCount);
+      const maxCount = Math.max(...buckets, 1);
+      const xFor = (minutes) => padL + (minutes / FATIGUE_MAX_MIN) * plotW;
+      const yFor = (value) => padT + plotH - (value / maxCount) * plotH;
+
+      // The curve is drawn through bucket CENTRES, which is where the count
+      // actually applies — drawing through the left edge would shift the whole
+      // curve half a bucket earlier than the data.
+      const points = buckets.map((value, i) => [
+        xFor((i + 0.5) * FATIGUE_BUCKET_MIN),
+        yFor(value),
+      ]);
+      const line = points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+      const area = `${points[0][0].toFixed(1)},${(padT + plotH).toFixed(1)} ${line} ` +
+        `${points[points.length - 1][0].toFixed(1)},${(padT + plotH).toFixed(1)}`;
+
+      let peak = 0;
+      for (let i = 1; i < buckets.length; i++) if (buckets[i] > buckets[peak]) peak = i;
+
+      const gridLines = [];
+      for (let m = 0; m <= FATIGUE_MAX_MIN; m += 30) {
+        const x = xFor(m);
+        gridLines.push(`<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" ` +
+          `y2="${padT + plotH}" stroke="var(--border)" stroke-width="1"/>`);
+        gridLines.push(`<text x="${x.toFixed(1)}" y="${H - 14}" text-anchor="middle" ` +
+          `font-size="12" fill="var(--text-faint)">${m}m</text>`);
+      }
+      // Horizontal guides at the top and middle of the count axis.
+      for (const fraction of [0, 0.5, 1]) {
+        const y = yFor(maxCount * fraction);
+        gridLines.push(`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W - padR}" ` +
+          `y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`);
+        gridLines.push(`<text x="${padL - 10}" y="${(y + 4).toFixed(1)}" text-anchor="end" ` +
+          `font-size="12" fill="var(--text-faint)">${Math.round(maxCount * fraction)}</text>`);
+      }
+
+      const markers = interventions.map(({ minutes, event }) => {
+        const x = xFor(minutes);
+        const index = Math.min(count - 1, Math.floor(minutes / FATIGUE_BUCKET_MIN));
+        const y = yFor(buckets[index]) - 14;
+        const label = `${Math.round(minutes)}m in · ${event.topic || 'no topic'} · help given`;
+        return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(45)">` +
+          `<rect x="-4.5" y="-4.5" width="9" height="9" rx="1.5" fill="var(--ok)" ` +
+          `stroke="var(--panel-bg-inset)" stroke-width="1.5"><title>${escapeHtml(label)}</title></rect></g>`;
+      }).join('');
+
+      host.innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" role="img"
+          aria-label="Stuck moments by minutes into a session, across all sessions">
+          <defs>
+            <linearGradient id="fatigue-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="var(--accent-glow)" stop-opacity="0.04"/>
+            </linearGradient>
+            <linearGradient id="fatigue-stroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--accent)"/>
+              <stop offset="100%" stop-color="var(--accent-glow)"/>
+            </linearGradient>
+          </defs>
+          ${gridLines.join('')}
+          <polygon points="${area}" fill="url(#fatigue-fill)"/>
+          <polyline points="${line}" fill="none" stroke="url(#fatigue-stroke)" stroke-width="2.6"
+            stroke-linejoin="round" stroke-linecap="round"/>
+          <line x1="${xFor((peak + 0.5) * FATIGUE_BUCKET_MIN).toFixed(1)}" y1="${padT}"
+            x2="${xFor((peak + 0.5) * FATIGUE_BUCKET_MIN).toFixed(1)}" y2="${padT + plotH}"
+            stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="${(xFor((peak + 0.5) * FATIGUE_BUCKET_MIN) + 8).toFixed(1)}" y="${padT + 14}"
+            font-size="12" fill="var(--danger)">peak ${peak * FATIGUE_BUCKET_MIN}–${(peak + 1) * FATIGUE_BUCKET_MIN}m</text>
+          ${markers}
+        </svg>
+      `;
     }
+
+    // ----- 4. Goals -----
+    // Stored under their own key, so clearing events never touches them and
+    // clearing goals never touches events.
+    const GOALS_KEY = 'iris.goals.v1';
+    const GOAL_TICK_MS = 15000;
+
+    function loadGoals() {
+      try {
+        const raw = localStorage.getItem(GOALS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn('[goals] stored goals unreadable, starting empty:', error.message);
+        return [];
+      }
+    }
+
+    function saveGoals(goals) {
+      try {
+        localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
+      } catch (error) {
+        console.warn('[goals] could not save:', error.message);
+      }
+    }
+
+    // Time is credited to the active goal from the moment it BECOMES active,
+    // not from when the app started: a goal cannot claim the hour before it
+    // existed. flushActiveGoalTime() is called before anything changes which
+    // goal is active, so no elapsed time is lost or double-counted.
+    let goalSessionStartedAt = null;
+
+    function activeGoal(goals) {
+      return goals.find((g) => g.active) || null;
+    }
+
+    function flushActiveGoalTime() {
+      if (goalSessionStartedAt === null) return;
+      const goals = loadGoals();
+      const active = activeGoal(goals);
+      const now = Date.now();
+      if (active) {
+        active.totalMs = (active.totalMs || 0) + (now - goalSessionStartedAt);
+        saveGoals(goals);
+      }
+      goalSessionStartedAt = active ? now : null;
+    }
+
+    function formatGoalDuration(ms) {
+      const totalMinutes = Math.floor(ms / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (hours === 0) return `${minutes}m`;
+      return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+    }
+
+    function renderGoalsPanel() {
+      const list = document.getElementById('goal-list');
+      const strip = document.getElementById('goal-active-strip');
+      const emptyEl = document.getElementById('goals-empty');
+      if (!list) return;
+
+      const goals = loadGoals();
+      list.innerHTML = '';
+      setEmptyState(emptyEl, goals.length === 0);
+
+      const active = activeGoal(goals);
+      if (active && goalSessionStartedAt === null) goalSessionStartedAt = Date.now();
+      if (!active) goalSessionStartedAt = null;
+
+      if (active) {
+        const thisSession = goalSessionStartedAt === null ? 0 : Date.now() - goalSessionStartedAt;
+        strip.classList.remove('hidden');
+        strip.innerHTML =
+          `<span class="goal-active-title">${escapeHtml(active.title)}</span>` +
+          `<span class="goal-active-timer">This session ${formatGoalDuration(thisSession)}` +
+          ` · ${formatGoalDuration((active.totalMs || 0) + thisSession)} in total</span>`;
+      } else {
+        strip.classList.add('hidden');
+        strip.innerHTML = '';
+      }
+
+      goals.forEach((goal) => {
+        const row = document.createElement('div');
+        row.className = 'goal-row' + (goal.active ? ' active' : '');
+        const live = goal.active && goalSessionStartedAt !== null
+          ? Date.now() - goalSessionStartedAt : 0;
+        row.innerHTML = `
+          <span class="goal-name">${escapeHtml(goal.title)}</span>
+          <span class="goal-total">${formatGoalDuration((goal.totalMs || 0) + live)}</span>
+          <button type="button" class="goal-activate${goal.active ? ' on' : ''}"
+            data-goal-action="activate">${goal.active ? 'Active' : 'Make active'}</button>
+          <button type="button" data-goal-action="delete">Delete</button>
+        `;
+        row.addEventListener('click', (domEvent) => {
+          const button = domEvent.target.closest('button[data-goal-action]');
+          if (!button) return;
+          const action = button.getAttribute('data-goal-action');
+          // Banked before the active goal changes, so the time already spent
+          // stays with the goal it was spent on.
+          flushActiveGoalTime();
+          const current = loadGoals();
+          const target = current.find((g) => g.id === goal.id);
+          if (!target) return;
+
+          if (action === 'activate') {
+            const turningOn = !target.active;
+            current.forEach((g) => { g.active = false; });
+            target.active = turningOn;
+            goalSessionStartedAt = turningOn ? Date.now() : null;
+            console.log(`[goals] ${turningOn ? 'activated' : 'deactivated'} "${target.title}"`);
+          } else if (action === 'delete') {
+            const index = current.indexOf(target);
+            current.splice(index, 1);
+            if (target.active) goalSessionStartedAt = null;
+            console.log(`[goals] deleted "${target.title}"`);
+          }
+          saveGoals(current);
+          renderGoalsPanel();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    // The live timer on the active goal. Banks the elapsed time on the same
+    // cadence it redraws, so a crash costs at most one tick rather than the
+    // whole session.
+    setInterval(() => {
+      if (goalSessionStartedAt === null) return;
+      flushActiveGoalTime();
+      if (document.body.classList.contains('dashboard-active')) renderGoalsPanel();
+    }, GOAL_TICK_MS);
 
     // ----- 3. Difficulty Patterns (bar chart as styled divs) -----
     function renderDifficultyPanel(events) {
@@ -6511,7 +7569,58 @@
       });
     }
 
-    // ----- 4. Session Timeline -----
+    // ----- 7. Session Timeline -----
+    // Each strip is a button in all but name: clicking it opens the session
+    // underneath, listing what actually happened in it. Only one is open at a
+    // time — two open sessions side by side invite comparing them, which the
+    // strips are not precise enough to support.
+    let openSessionKey = null;
+
+    function sessionDetailMarkup(session) {
+      const start = session[0].startTime;
+      const end = Math.max(...session.map(getEventEnd));
+      const topics = [...new Set(session.map((e) => e.topic).filter(Boolean))];
+      const helped = session.filter((e) => e.helpText).length;
+      const resolved = session.filter((e) => e.resolved === true).length;
+
+      const head = `
+        <div class="session-detail-head">
+          <span>${formatTime(start)} – ${formatTime(end)}</span>
+          <span>${formatGoalDuration(Math.max(end - start, 0))} long</span>
+          <span>${session.length} stuck moment${session.length === 1 ? '' : 's'}</span>
+          <span>${resolved} resolved</span>
+          <span>${helped} explained by IRIS</span>
+          <span>${topics.length ? 'Topics: ' + topics.map(escapeHtml).join(', ') : 'No topics recorded'}</span>
+        </div>
+      `;
+
+      const rows = [...session]
+        .sort((a, b) => a.startTime - b.startTime)
+        .map((event) => {
+          const tags = [];
+          tags.push(`<span class="session-tag ${event.resolved === true ? 'resolved' : 'unresolved'}">` +
+            `${event.resolved === true ? 'resolved' : 'unresolved'}</span>`);
+          if (event.helpText) tags.push('<span class="session-tag helped">help given</span>');
+          const help = event.helpText
+            ? `<p class="session-event-help">${escapeHtml(event.helpText)}</p>`
+            : (event.helpError
+              ? `<p class="session-event-help">Help failed: ${escapeHtml(event.helpError)}</p>`
+              : '');
+          return `
+            <div class="session-event">
+              <div class="session-event-head">
+                <span class="session-event-time">${formatTime(event.startTime)}</span>
+                <span class="session-event-topic">${escapeHtml(event.topic || 'No topic recorded')}</span>
+                ${tags.join('')}
+              </div>
+              ${help}
+            </div>
+          `;
+        }).join('');
+
+      return head + rows;
+    }
+
     function renderTimelinePanel(events) {
       const container = document.getElementById('timeline-sessions');
       const emptyEl = document.getElementById('timeline-empty');
@@ -6531,13 +7640,19 @@
         const start = session[0].startTime;
         const end = Math.max(...session.map(getEventEnd));
         const span = Math.max(end - start, 1); // avoid divide-by-zero for a single-instant session
+        const key = String(start);
 
         const wrap = document.createElement('div');
-        wrap.className = 'session-strip';
+        wrap.className = 'session-strip clickable' + (openSessionKey === key ? ' open' : '');
+        wrap.tabIndex = 0;
+        wrap.setAttribute('role', 'button');
+        wrap.setAttribute('aria-expanded', openSessionKey === key ? 'true' : 'false');
 
         const label = document.createElement('div');
         label.className = 'session-strip-label';
-        label.textContent = `${formatDate(start)} · ${session.length} stuck moment${session.length === 1 ? '' : 's'}`;
+        label.textContent = `${formatDate(start)} · ${session.length} stuck moment` +
+          `${session.length === 1 ? '' : 's'}` +
+          `${openSessionKey === key ? ' — click to close' : ''}`;
         wrap.appendChild(label);
 
         const track = document.createElement('div');
@@ -6557,20 +7672,30 @@
         });
         wrap.appendChild(track);
 
+        const toggle = () => {
+          openSessionKey = openSessionKey === key ? null : key;
+          console.log(`[dashboard] session ${formatDate(start)} ` +
+            `${openSessionKey === key ? 'opened' : 'closed'}`);
+          renderTimelinePanel(events);
+        };
+        wrap.addEventListener('click', toggle);
+        wrap.addEventListener('keydown', (domEvent) => {
+          if (domEvent.key === 'Enter' || domEvent.key === ' ') {
+            domEvent.preventDefault();
+            toggle();
+          }
+        });
+
         container.appendChild(wrap);
+
+        if (openSessionKey === key) {
+          const detail = document.createElement('div');
+          detail.className = 'session-detail';
+          detail.innerHTML = sessionDetailMarkup(session);
+          container.appendChild(detail);
+        }
       });
     }
-
-    // ----- Per-card controls -----
-    // Edit and Delete, on every Help History and Revision card. Both panels
-    // draw different bodies but carry the same controls, so the markup and the
-    // wiring live here rather than being written twice.
-    //
-    // Editing is inline: the fields become inputs in place, because these are
-    // one or two short strings and a dialog would be more machinery than the
-    // task deserves. Which fields are editable differs by panel — Help History
-    // edits the topic and the explanation, Revision edits the topic and the
-    // question it asks — so the caller passes them in.
 
     function cardControlsMarkup() {
       return `
@@ -6733,164 +7858,189 @@
       });
     }
 
-    // ----- 6. Revision -----
+    // ----- 6. Revision, as flashcards -----
+    // One card at a time, and EVERY card is reachable — not only the ones a
+    // schedule has decided are due. A queue that hides most of what you have
+    // learned is a queue you cannot revise from on the day you actually want
+    // to, so the ladder no longer gates what is visible: it only sets the
+    // order, due cards first.
+    //
+    // Nothing here reschedules a card on its own. When it comes back is set by
+    // the reader, on the card, and by nothing else.
+    let revisionIndex = 0;
+
+    function revisionDeck(events) {
+      const now = Date.now();
+      // Anything with a topic is a card. Resolved struggles stay in the deck —
+      // "I got this" is not a reason to be unable to look at it again.
+      const deck = events.filter((e) => e.topic);
+      const dueAt = (e) => (e.revisitDue ? e.revisitDue : e.startTime + ONE_DAY_MS);
+      // Due first, oldest due date first; everything else after, soonest next.
+      return deck.sort((a, b) => {
+        const aDue = dueAt(a) <= now;
+        const bDue = dueAt(b) <= now;
+        if (aDue !== bDue) return aDue ? -1 : 1;
+        return dueAt(a) - dueAt(b);
+      });
+    }
+
+    function describeNextDue(event) {
+      if (!event.revisitDue) return 'Not scheduled';
+      const delta = event.revisitDue - Date.now();
+      if (delta <= 0) return 'Due now';
+      const hours = delta / 3600000;
+      if (hours < 24) return `Due in ${Math.max(1, Math.round(hours))} hour${Math.round(hours) === 1 ? '' : 's'}`;
+      return `Due ${formatDate(event.revisitDue)}`;
+    }
+
     function renderRevisionPanel(events) {
       const container = document.getElementById('revision-list');
+      const nav = document.getElementById('revision-nav');
+      const counter = document.getElementById('revision-counter');
       const emptyEl = document.getElementById('revision-empty');
+      if (!container) return;
       container.innerHTML = '';
 
-      const now = Date.now();
-
-      // ----- Who is eligible at all -----
-      // Unresolved only. A verified resolution is finished with: it has no
-      // revisitDue, and it is excluded here as well so a stale revisitDue on
-      // an older event cannot resurrect it.
-      const unresolved = events.filter((e) =>
-        e.resolved !== true && e.verificationVerdict !== 'resolved');
-
-      // A card with no topic has no title to show and nothing to identify it
-      // by, so it is not reviewable — skipped rather than shown as "Untitled
-      // struggle", which taught nobody anything.
-      const reviewable = unresolved.filter((e) => e.topic);
-      const skippedNoTopic = unresolved.length - reviewable.length;
-
-      // ----- Who is due -----
-      // Strictly the 1/3/7 day ladder. A card is not shown before its date:
-      // showing it early is the one thing that would defeat spaced repetition,
-      // which is the entire reason the ladder exists. Events recorded before
-      // the ladder did have no revisitDue and keep the old "older than a day"
-      // rule so they are not stranded.
-      const isDue = (e) => (e.revisitDue
-        ? now >= e.revisitDue
-        : (now - e.startTime) > ONE_DAY_MS);
-
-      const due = reviewable.filter(isDue)
-        .sort((a, b) => (a.revisitDue || a.startTime) - (b.revisitDue || b.startTime));
-      const scheduled = reviewable.filter((e) => !isDue(e));
-
-      console.log(`[dashboard] revision: ${due.length} due, ${scheduled.length} scheduled, ` +
-        `${events.length - unresolved.length} resolved, ${skippedNoTopic} skipped (no topic)`);
-
-      if (due.length === 0) {
-        // The empty state says which kind of empty this is, so a queue waiting
-        // behind a date is never mistaken for a panel that has stopped working.
-        if (scheduled.length > 0) {
-          const next = Math.min(...scheduled.map((e) => e.revisitDue || (e.startTime + ONE_DAY_MS)));
-          const hours = Math.max(1, Math.round((next - now) / (60 * 60 * 1000)));
-          emptyEl.textContent = `Nothing due yet — ${scheduled.length} card` +
-            `${scheduled.length === 1 ? '' : 's'} scheduled, the next in about ` +
-            (hours < 48 ? `${hours} hour${hours === 1 ? '' : 's'}` : `${Math.round(hours / 24)} days`) + '.';
-        } else if (events.length === 0) {
-          emptyEl.textContent = 'No events recorded yet — nothing to review.';
-        } else {
-          emptyEl.textContent = 'Nothing to review; every stored struggle was resolved.';
-        }
+      const deck = revisionDeck(events);
+      if (deck.length === 0) {
+        nav.classList.add('hidden');
+        emptyEl.textContent = events.length === 0
+          ? 'No events recorded yet — nothing to review.'
+          : 'No cards yet. A struggle becomes a card once IRIS has given it a topic.';
         setEmptyState(emptyEl, true);
         return;
       }
       setEmptyState(emptyEl, false);
+      nav.classList.remove('hidden');
 
-      due.forEach((event) => {
-        const card = document.createElement('div');
-        card.className = 'revision-card';
+      // Clamped rather than reset: deleting the last card should leave you on
+      // the new last card, not throw you back to the beginning of the deck.
+      if (revisionIndex >= deck.length) revisionIndex = deck.length - 1;
+      if (revisionIndex < 0) revisionIndex = 0;
+      const event = deck[revisionIndex];
+      const now = Date.now();
 
-        const daysAgo = Math.max(1, Math.round((now - event.startTime) / ONE_DAY_MS));
-        // Which rung of the ladder brought it back, so a card that keeps
-        // returning is visibly a card that keeps returning.
-        const stage = typeof event.revisitStage === 'number' ? event.revisitStage : 0;
-        const rungLabel = stage > 0
-          ? ` · review ${Math.min(stage, REVISIT_LADDER_DAYS.length)} of ${REVISIT_LADDER_DAYS.length}`
-          : '';
+      const daysAgo = Math.max(1, Math.round((now - event.startTime) / ONE_DAY_MS));
+      const evidence = event.snippet
+        ? `<pre class="snippet-block">${escapeHtml(event.snippet)}</pre>`
+        : (event.capture && event.capture.thumbnail
+          ? `<img class="revision-thumb" src="${escapeHtml(event.capture.thumbnail)}" alt="What was on screen at the time">`
+          : '');
+      const question = event.revisionQuestion || 'Can you work through this on your own now?';
 
-        // Everything on this card comes from what was stored at the time. The
-        // topic and the question were generated with the explanation itself
-        // (see the JSON reply in main.js), which is what lets the card ask
-        // about the actual material instead of asking, of nothing in
-        // particular, whether you remember it. No fallback title is needed —
-        // events without a topic never reach this loop.
-        const heading = event.topic;
+      const card = document.createElement('div');
+      card.className = 'flashcard';
+      card.innerHTML = `
+        <p class="flashcard-topic">${escapeHtml(event.topic)}</p>
+        <p class="flashcard-meta">${daysAgo} day${daysAgo === 1 ? '' : 's'} ago · ` +
+          `${event.resolved === true ? 'marked resolved' : 'unresolved'} · ${describeNextDue(event)}</p>
+        ${evidence}
+        <p class="flashcard-question">${escapeHtml(question)}</p>
+        ${event.helpText ? `
+          <details class="revision-recall">
+            <summary>What IRIS said at the time</summary>
+            <p>${escapeHtml(event.helpText)}</p>
+          </details>` : ''}
+        ${cardControlsMarkup()}
+        <div class="flashcard-due">
+          <span class="flashcard-due-label">Bring this back:</span>
+          <button type="button" data-due="hours">In a few hours</button>
+          <button type="button" data-due="tomorrow">Tomorrow</button>
+          <button type="button" data-due="week">In a week</button>
+          <input type="date" data-due-date aria-label="Custom date to resurface this card">
+          <button type="button" data-due="never">Don't resurface</button>
+        </div>
+      `;
 
-        // The stored snippet is the material. When there is none, the
-        // thumbnail of the captured region stands in — real events store the
-        // picture, sample data stores the text, and either identifies the
-        // moment well enough to review it.
-        const evidence = event.snippet
-          ? `<pre class="snippet-block">${escapeHtml(event.snippet)}</pre>`
-          : (event.capture && event.capture.thumbnail
-            ? `<img class="revision-thumb" src="${escapeHtml(event.capture.thumbnail)}" alt="What was on screen at the time">`
-            : '');
+      const setDue = (whenMs, label) => {
+        console.log(`[revision] "${event.topic}" set to resurface: ${label}`);
+        updateStruggleEvent(event.id, { revisitDue: whenMs });
+        renderDashboard();
+      };
 
-        // Falls back only when there is no stored question — events recorded
-        // before questions were generated, and ones whose help call failed.
-        const question = event.revisionQuestion
-          || 'Can you work through this on your own now?';
-
-        card.innerHTML = `
-          <p class="revision-topic">${escapeHtml(heading)}</p>
-          <p class="revision-meta">${daysAgo} day${daysAgo === 1 ? '' : 's'} ago${rungLabel}</p>
-          ${evidence}
-          <p class="revision-question">${escapeHtml(question)}</p>
-          ${event.helpText ? `
-            <details class="revision-recall">
-              <summary>What IRIS said at the time</summary>
-              <p>${escapeHtml(event.helpText)}</p>
-            </details>` : ''}
-          ${cardControlsMarkup()}
-          <div class="revision-actions">
-            <button data-rating="stuck" type="button">Still stuck</button>
-            <button data-rating="getting-there" type="button">Getting there</button>
-            <button class="rate-good" data-rating="got-it" type="button">Got it!</button>
-          </div>
-        `;
-
-        // The schema has no field to store a "self-rating" directly, so
-        // each rating maps onto the closest existing field instead:
-        //   - "Got it!"        -> resolved: true, resolutionMs recorded
-        //   - "Getting there"  -> not resolved yet, but revisitDue pushed
-        //                          out further (check back in 3 days)
-        //   - "Still stuck"    -> revisitDue pushed out a shorter amount
-        //                          (check back tomorrow)
-        // Whichever button is clicked, the card is pulled from view right
-        // away — there's no "last reviewed" field to filter a re-render on,
-        // so removing it from the DOM is what makes it feel "reviewed".
-        card.querySelectorAll('button[data-rating]').forEach((button) => {
-          button.addEventListener('click', () => {
-            const rating = button.dataset.rating;
-            const stage = typeof event.revisitStage === 'number' ? event.revisitStage : 0;
-            console.log(`[dashboard] revision rating "${rating}" for ${event.id} (stage ${stage})`);
-            if (rating === 'got-it') {
-              // Clears it outright, revisitDue included — otherwise the ladder
-              // would keep bringing back something the reader has said they
-              // know.
-              updateStruggleEvent(event.id, {
-                resolved: true,
-                resolutionMs: now - event.startTime,
-                revisitDue: null,
-              });
-            } else {
-              // Anything short of "got it" moves one rung up the same 1/3/7
-              // day ladder verification uses, so the two agree about spacing.
-              const nextStage = rating === 'getting-there' ? stage + 1 : stage;
-              const days = REVISIT_LADDER_DAYS[Math.min(nextStage, REVISIT_LADDER_DAYS.length - 1)];
-              updateStruggleEvent(event.id, {
-                revisitDue: now + days * ONE_DAY_MS,
-                revisitStage: nextStage,
-              });
-            }
-
-            // Redrawn rather than just removed from the DOM: a rating changes
-            // revisitDue, which changes what is due, and the panel should show
-            // the queue it actually has now.
-            renderDashboard();
-          });
+      card.querySelectorAll('button[data-due]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const choice = button.getAttribute('data-due');
+          if (choice === 'hours') setDue(now + 4 * 3600000, 'in 4 hours');
+          else if (choice === 'tomorrow') setDue(now + ONE_DAY_MS, 'tomorrow');
+          else if (choice === 'week') setDue(now + 7 * ONE_DAY_MS, 'in a week');
+          else setDue(null, 'never');
         });
+      });
 
-        wireCardControls(card, event, [
-          { key: 'topic', label: 'Topic' },
-          { key: 'revisionQuestion', label: 'Question', multiline: true },
-        ]);
+      const dateInput = card.querySelector('[data-due-date]');
+      if (event.revisitDue) {
+        const due = new Date(event.revisitDue);
+        dateInput.value = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, '0')}-` +
+          `${String(due.getDate()).padStart(2, '0')}`;
+      }
+      dateInput.addEventListener('change', () => {
+        if (!dateInput.value) return;
+        // Parsed as local midnight rather than through Date(string), which
+        // reads a bare yyyy-mm-dd as UTC and lands the card on the wrong day
+        // for anyone west of Greenwich.
+        const [y, m, d] = dateInput.value.split('-').map(Number);
+        setDue(new Date(y, m - 1, d, 9, 0, 0).getTime(), dateInput.value);
+      });
 
-        container.appendChild(card);
+      wireCardControls(card, event, [
+        { key: 'topic', label: 'Topic' },
+        { key: 'revisionQuestion', label: 'Question', multiline: true },
+      ]);
+
+      container.appendChild(card);
+      counter.textContent = `Card ${revisionIndex + 1} of ${deck.length}`;
+
+      const prev = document.getElementById('revision-prev');
+      const next = document.getElementById('revision-next');
+      prev.disabled = revisionIndex === 0;
+      next.disabled = revisionIndex === deck.length - 1;
+      // Replaced rather than added to: this function runs on every redraw, and
+      // stacking a fresh listener each time would step several cards per click.
+      prev.onclick = () => { revisionIndex -= 1; renderRevisionPanel(events); };
+      next.onclick = () => { revisionIndex += 1; renderRevisionPanel(events); };
+    }
+
+    // ----- Dashboard tabs -----
+    // Both panes stay in the DOM; only their display changes. Overview is the
+    // default because it is what the app is for — Settings is machinery, and
+    // machinery should be one click away rather than the first thing shown.
+    function showDashTab(name) {
+      document.querySelectorAll('.dash-tab').forEach((tab) => {
+        const on = tab.getAttribute('data-dash-tab') === name;
+        tab.classList.toggle('active', on);
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.dash-pane').forEach((pane) => {
+        pane.classList.toggle('active', pane.id === `dash-${name}`);
+      });
+      console.log(`[dashboard] tab -> ${name}`);
+    }
+
+    document.querySelectorAll('.dash-tab').forEach((tab) => {
+      tab.addEventListener('click', () => showDashTab(tab.getAttribute('data-dash-tab')));
+    });
+
+    // ----- Goal entry -----
+    const goalAddForm = document.getElementById('goal-add');
+    if (goalAddForm) {
+      goalAddForm.addEventListener('submit', (domEvent) => {
+        domEvent.preventDefault();
+        const input = document.getElementById('goal-input');
+        const title = input.value.trim();
+        if (!title) return;
+        const goals = loadGoals();
+        goals.push({
+          id: `goal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          title,
+          active: false,
+          totalMs: 0,
+          createdAt: Date.now(),
+        });
+        saveGoals(goals);
+        input.value = '';
+        console.log(`[goals] added "${title}"`);
+        renderGoalsPanel();
       });
     }
 
@@ -7213,6 +8363,25 @@
     // below) stays warm instead of resetting every time you toggle modes.
     // The whole path from an engine reading to the orb's target. Every
     // reading is used: buffer it, average the last 5, drive the orb.
+    // ===== SCREEN SPACE =====
+    // gaze.js now produces and clamps its estimates in SCREEN pixels, and the
+    // calibration below trains it in the same space, so nothing about the
+    // mapping depends on the size or position of this window any more. These
+    // are the only two functions that say how big that space is, and the two
+    // that convert out of it.
+    //
+    // Everything that REASONS about gaze — the zone grid, the progress
+    // detector, the fixation and row detectors, the verification — works in
+    // screen coordinates. Everything that DRAWS — the in-window orb, the
+    // screenshot anchor handed to the main process — converts to this window's
+    // viewport first, because that is a display concern.
+    function screenW() { return (window.screen && window.screen.width) || window.innerWidth; }
+    function screenH() { return (window.screen && window.screen.height) || window.innerHeight; }
+    // The window's own origin on that screen. Subtracting it turns a screen
+    // coordinate into a viewport one.
+    function toViewportX(screenX) { return screenX - (window.screenX || 0); }
+    function toViewportY(screenY) { return screenY - (window.screenY || 0); }
+
     function handleGazeData(data) {
       if (!data) return; // defensive — the engine doesn't call this without an estimate
       const now = performance.now();
@@ -7294,11 +8463,13 @@
 
       if (trackingMode !== 'gaze') return; // recorded, but not driving the orb right now
 
-      // Keep the orb's visible edge inside the window. gaze.js already
-      // clamped the prediction to 0..width; this insets it by the orb's own
-      // radius so the blob doesn't hang off the side.
-      targetX = clamp(smoothedGazeX, ORB_RADIUS, window.innerWidth - ORB_RADIUS);
-      targetY = clamp(smoothedGazeY, ORB_RADIUS, window.innerHeight - ORB_RADIUS);
+      // DISPLAY ONLY. smoothedGazeX/Y are screen coordinates; the orb is drawn
+      // in this window, so they are converted here and nowhere else. The clamp
+      // that follows keeps the blob's visible edge inside the window — it is
+      // about where the orb can be drawn, and it no longer touches the value
+      // any detector reads.
+      targetX = clamp(toViewportX(smoothedGazeX), ORB_RADIUS, window.innerWidth - ORB_RADIUS);
+      targetY = clamp(toViewportY(smoothedGazeY), ORB_RADIUS, window.innerHeight - ORB_RADIUS);
     }
 
     // How long since the last non-null gaze reading before we consider the
@@ -7594,9 +8765,18 @@
           calibrationDot.classList.add('collecting');
           console.log(`[calibration] point ${index + 1} clicked — collecting ${sampleCount} samples`);
 
-          const xPixel = (xPercent / 100) * window.innerWidth;
-          const yPixel = (yPercent / 100) * window.innerHeight;
-          console.log(`[calibration] mapping point ${index + 1}: (${xPercent}%, ${yPercent}%) -> (${Math.round(xPixel)}, ${Math.round(yPixel)}) px, window: ${window.innerWidth} x ${window.innerHeight}`);
+          // The dot is positioned as a percentage of the WINDOW, so its
+          // window coordinates are converted to SCREEN coordinates before they
+          // are handed to the fit. Training on window coordinates is what tied
+          // the whole mapping to the window's size and position: the same dot,
+          // with the window moved an inch, taught the model two different
+          // answers for one place on the screen.
+          const xPixel = (window.screenX || 0) + (xPercent / 100) * window.innerWidth;
+          const yPixel = (window.screenY || 0) + (yPercent / 100) * window.innerHeight;
+          console.log(`[calibration] mapping point ${index + 1}: (${xPercent}%, ${yPercent}%) -> ` +
+            `screen (${Math.round(xPixel)}, ${Math.round(yPixel)}) px  ` +
+            `[window ${window.innerWidth}x${window.innerHeight} at ` +
+            `(${window.screenX || 0}, ${window.screenY || 0}) on a ${screenW()}x${screenH()} screen]`);
           collectCalibrationSamples(xPixel, yPixel, sampleCount).then((tally) => {
             const refusedSummary = Object.entries(tally.refusals)
               .map(([reason, n]) => `${reason} x${n}`).join(', ') || 'none';
@@ -7638,8 +8818,8 @@
         await wait(ACCURACY_HOLD_MS); // give you time to settle your gaze and the smoothing buffer time to catch up
 
         if (gazeBuffer.length > 0) {
-          const trueX = (xPercent / 100) * window.innerWidth;
-          const trueY = (yPercent / 100) * window.innerHeight;
+          const trueX = (window.screenX || 0) + (xPercent / 100) * window.innerWidth;
+          const trueY = (window.screenY || 0) + (yPercent / 100) * window.innerHeight;
           errors.push(Math.hypot(smoothedGazeX - trueX, smoothedGazeY - trueY));
         }
       }
@@ -7739,7 +8919,7 @@
 
       const result = await window.iris.saveCalibration({
         ...calibration,
-        viewport: { w: window.innerWidth, h: window.innerHeight },
+        viewport: { w: screenW(), h: screenH() },
         devicePixelRatio: window.devicePixelRatio,
         savedAt: new Date().toISOString(),
       });
@@ -7769,7 +8949,10 @@
       // This reuses the existing resize invalidation, so tracking quality
       // already reports "INVALID (resized)" and says what to do about it —
       // rather than silently pointing the orb at the wrong part of the screen.
-      const sizeMatches = saved && saved.w === window.innerWidth && saved.h === window.innerHeight;
+      // Compared against the SCREEN now: the mapping is trained in screen
+      // coordinates, so a resized window no longer invalidates it — a changed
+      // screen does.
+      const sizeMatches = saved && saved.w === screenW() && saved.h === screenH();
       calibrationInvalidatedByResize = !sizeMatches;
 
       if (sizeMatches) {
@@ -7789,23 +8972,28 @@
       clearTimeout(resizeDebounceTimer);
       resizeDebounceTimer = setTimeout(() => {
         if (!calibratedAtSize) return; // nothing to invalidate yet
-        const w = window.innerWidth;
-        const h = window.innerHeight;
+        // The SCREEN, not the window. The mapping is trained and evaluated in
+        // screen coordinates, so resizing or moving this window cannot
+        // invalidate it any more — and it must not claim to, because that
+        // warning used to fire on every resize and tell the reader to redo a
+        // calibration that was in fact still correct.
+        const w = screenW();
+        const h = screenH();
         if (w === calibratedAtSize.w && h === calibratedAtSize.h) {
           // Back at the exact calibrated size (e.g. re-maximised) — the
           // trained model is valid again.
           if (calibrationInvalidatedByResize) {
             calibrationInvalidatedByResize = false;
-            console.log('[calibration] window returned to calibrated size', w, 'x', h, '— calibration valid again');
-            showCalibrationToast('Window back to calibrated size — tracking valid again');
+            console.log('[calibration] screen back to the calibrated size', w, 'x', h, '— calibration valid again');
+            showCalibrationToast('Screen back to the calibrated size — tracking valid again');
           }
           return;
         }
         if (!calibrationInvalidatedByResize) {
           calibrationInvalidatedByResize = true;
-          console.warn('[calibration] WINDOW RESIZED', calibratedAtSize.w, 'x', calibratedAtSize.h, '->', w, 'x', h,
+          console.warn('[calibration] SCREEN CHANGED', calibratedAtSize.w, 'x', calibratedAtSize.h, '->', w, 'x', h,
             '— calibration is now INVALID (the model predicts in the old coordinate space). Recalibrate with R.');
-          showCalibrationToast('Window resized — calibration is invalid. Press R to recalibrate.', 6000);
+          showCalibrationToast('Screen changed — calibration is invalid. Press R to recalibrate.', 6000);
         }
       }, 400);
     });
@@ -7825,6 +9013,12 @@
     function reportQuality() {
       const lines = [];
       const misses = [];
+      // The y axis, point by point: its coefficient and predicted-vs-actual
+      // for every calibration point. Printed as its own block because the y
+      // fit is the one that has been failing, and burying it inside the
+      // combined report is what made it hard to see.
+      if (typeof gaze !== 'undefined' && gaze.reportYFit) gaze.reportYFit('post-calibration');
+
       const fit = typeof gaze !== 'undefined' ? gaze.fitReport() : null;
 
       lines.push('===== GAZE FIT REPORT =====');
@@ -7952,9 +9146,10 @@
       // This run trained the model for exactly this window size — record it
       // so the resize listener above knows what "still valid" means, and
       // clear any standing invalidation from an earlier resize.
-      calibratedAtSize = { w: window.innerWidth, h: window.innerHeight };
+      calibratedAtSize = { w: screenW(), h: screenH() };
       calibrationInvalidatedByResize = false;
-      console.log('[calibration] model now valid for window size', calibratedAtSize.w, 'x', calibratedAtSize.h);
+      console.log('[calibration] model now valid for screen size', calibratedAtSize.w, 'x', calibratedAtSize.h,
+        '— window size and position no longer affect it');
 
       // Written here rather than on quit: this is the moment there is a fit
       // worth keeping, and a crash or a force-quit later should not cost it.
@@ -8088,8 +9283,10 @@
       return {
         xPct,
         yPct,
-        xPixel: (xPct / 100) * window.innerWidth,
-        yPixel: (yPct / 100) * window.innerHeight,
+        // Screen coordinates, so the measured error is compared in the same
+        // space the prediction is made in.
+        xPixel: (window.screenX || 0) + (xPct / 100) * window.innerWidth,
+        yPixel: (window.screenY || 0) + (yPct / 100) * window.innerHeight,
       };
     }
 
@@ -8383,8 +9580,8 @@
     // it was, which is what lets the CSS blur come down from 6px to 1.5px —
     // the detail now comes from the grid rather than from smearing a coarse
     // one until its cells stop showing.
-    const GAZE_HEAT_COLS = 112;
-    const GAZE_HEAT_ROWS = 70;
+    const GAZE_HEAT_COLS = 224;
+    const GAZE_HEAT_ROWS = 140;
     const gazeHeatGrid = new Float32Array(GAZE_HEAT_COLS * GAZE_HEAT_ROWS);
 
     // The grid is rendered at grid resolution into this tiny offscreen
@@ -8396,6 +9593,11 @@
     gazeHeatSource.height = GAZE_HEAT_ROWS;
     const gazeHeatSourceCtx = gazeHeatSource.getContext('2d');
     const gazeHeatImage = gazeHeatSourceCtx.createImageData(GAZE_HEAT_COLS, GAZE_HEAT_ROWS);
+
+    // The halfway house for the two-step upscale in drawGazeHeatmap(). Sized
+    // there, on first draw, so it never has to be kept in step by hand.
+    const gazeHeatMid = document.createElement('canvas');
+    const gazeHeatMidCtx = gazeHeatMid.getContext('2d');
 
     // Samples are {t, nx, ny} with nx/ny normalised 0..1, so the trail stays
     // correct if the stage is resized (or presentation mode resizes it)
@@ -8418,9 +9620,11 @@
       const rect = gazeStage.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return; // hidden — nothing to size to
 
-      // Capped at 2: beyond that the extra pixels cost real time per frame
-      // and buy nothing visible on a blurred heatmap and a soft trail.
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // The canvas backing store matches its displayed size times the full
+      // device pixel ratio — uncapped. The heatmap is drawn AT this resolution
+      // rather than drawn small and scaled up by the compositor, which is what
+      // was showing as blocky steps on a high-DPI screen.
+      const dpr = window.devicePixelRatio || 1;
       const width = Math.round(rect.width * dpr);
       const height = Math.round(rect.height * dpr);
 
@@ -8446,7 +9650,7 @@
       // Splat into a small neighbourhood with a falloff rather than a single
       // cell. One cell per sample would give a speckled grid; a soft splat
       // is what makes repeated looks at the same area pool into a blob.
-      const RADIUS = 4;
+      const RADIUS = 12;
       for (let dr = -RADIUS; dr <= RADIUS; dr++) {
         const r = row + dr;
         if (r < 0 || r >= GAZE_HEAT_ROWS) continue;
@@ -8455,7 +9659,12 @@
           if (c < 0 || c >= GAZE_HEAT_COLS) continue;
           const distance = Math.hypot(dc, dr);
           if (distance > RADIUS) continue;
-          const weight = 1 - distance / (RADIUS + 1);
+          // Gaussian falloff rather than linear. A linear splat is a cone —
+          // it has a hard point at the centre and a hard rim at the edge, and
+          // both survive into the final image as visible structure. A Gaussian
+          // has neither, so overlapping samples add up to a smooth mound.
+          const sigma = RADIUS / 2.5;
+          const weight = Math.exp(-(distance * distance) / (2 * sigma * sigma));
           const index = r * GAZE_HEAT_COLS + c;
           gazeHeatGrid[index] += weight;
           if (gazeHeatGrid[index] > gazeHeatPeak) gazeHeatPeak = gazeHeatGrid[index];
@@ -8487,13 +9696,10 @@
       [1.00, 255,  38,  92, 250],   // hot red
     ];
 
-    // How many discrete levels the ramp is cut into. The brief was "clear
-    // gradient steps rather than muddy blur": quantising the value before the
-    // colour lookup gives the field visible contour bands, the way a
-    // topographic map reads, instead of one continuous smear in which no two
-    // points are distinguishable. Twelve is enough to keep the shape smooth
-    // and few enough that each band is unmistakably its own colour.
-    const GAZE_HEAT_LEVELS = 12;
+    // The ramp is interpolated continuously between the stops above. It used
+    // to be quantised into discrete bands, and those bands were the visible
+    // blocky steps: intensity jumped from one colour to the next instead of
+    // sliding through it.
 
     function writeGazeHeatColor(data, offset, t) {
       let i = 0;
@@ -8508,28 +9714,109 @@
       data[offset + 3] = Math.round(from[4] + (to[4] - from[4]) * f);
     }
 
+    // ----- Smoothing the DATA, not the picture -----
+    // The pixelation came from quantising a raw grid: each band boundary
+    // followed the edges of the cells it happened to land on, so the contours
+    // came out as staircases, and a blur applied afterwards could only soften
+    // a staircase into a fuzzy staircase. Blurring the FIELD first moves the
+    // boundaries onto smooth curves before any colour is chosen, which is what
+    // actually removes the blockiness — the bands stay as distinct as they
+    // were, they just stop being cell-shaped.
+    //
+    // A true separable Gaussian: a horizontal pass then a vertical one, which
+    // costs 2 x (2r+1) multiply-adds per cell instead of the (2r+1)^2 a 2D
+    // kernel would, for the identical result.
+    // Edges clamp to the nearest in-bounds cell rather than to zero, so the
+    // field does not darken towards the borders of the stage.
+    const HEAT_BLUR_RADIUS = 5;
+    const HEAT_BLUR_SIGMA = 2.2;
+    const HEAT_BLUR_KERNEL = (() => {
+      const weights = [];
+      let total = 0;
+      for (let d = -HEAT_BLUR_RADIUS; d <= HEAT_BLUR_RADIUS; d++) {
+        const w = Math.exp(-(d * d) / (2 * HEAT_BLUR_SIGMA * HEAT_BLUR_SIGMA));
+        weights.push(w);
+        total += w;
+      }
+      return weights.map((w) => w / total);
+    })();
+    const heatBlurPassA = new Float32Array(GAZE_HEAT_COLS * GAZE_HEAT_ROWS);
+    const heatBlurPassB = new Float32Array(GAZE_HEAT_COLS * GAZE_HEAT_ROWS);
+
+    function blurHeatGrid() {
+      const cols = GAZE_HEAT_COLS;
+      const rows = GAZE_HEAT_ROWS;
+      const k = HEAT_BLUR_KERNEL;
+
+      for (let r = 0; r < rows; r++) {
+        const rowStart = r * cols;
+        for (let c = 0; c < cols; c++) {
+          let sum = 0;
+          for (let d = -HEAT_BLUR_RADIUS; d <= HEAT_BLUR_RADIUS; d++) {
+            const cc = Math.min(cols - 1, Math.max(0, c + d));
+            sum += gazeHeatGrid[rowStart + cc] * k[d + HEAT_BLUR_RADIUS];
+          }
+          heatBlurPassA[rowStart + c] = sum;
+        }
+      }
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          let sum = 0;
+          for (let d = -HEAT_BLUR_RADIUS; d <= HEAT_BLUR_RADIUS; d++) {
+            const rr = Math.min(rows - 1, Math.max(0, r + d));
+            sum += heatBlurPassA[rr * cols + c] * k[d + HEAT_BLUR_RADIUS];
+          }
+          heatBlurPassB[r * cols + c] = sum;
+        }
+      }
+      return heatBlurPassB;
+    }
+
     function drawGazeHeatmap() {
       const data = gazeHeatImage.data;
+      const field = blurHeatGrid();
 
-      for (let i = 0; i < gazeHeatGrid.length; i++) {
+      // Normalised against the blurred field's OWN peak. Using the raw grid's
+      // peak here would mean dividing a smoothed maximum by an unsmoothed one,
+      // which quietly darkens the hottest band every time the blur widens.
+      let peak = 0;
+      for (let i = 0; i < field.length; i++) if (field[i] > peak) peak = field[i];
+
+      for (let i = 0; i < field.length; i++) {
         // Normalise against the running peak, then take a square root so the
         // long tail of lightly-visited cells stays visible instead of being
         // crushed to nothing by one very hot spot.
-        const raw = gazeHeatPeak > 0 ? Math.sqrt(Math.min(1, gazeHeatGrid[i] / gazeHeatPeak)) : 0;
-        // Snapped to a band, except at the very bottom: quantising zero up to
-        // the first level would paint the entire untouched stage blue.
-        const t = raw <= 0 ? 0 : Math.ceil(raw * GAZE_HEAT_LEVELS) / GAZE_HEAT_LEVELS;
+        const t = peak > 0 ? Math.sqrt(Math.min(1, field[i] / peak)) : 0;
         writeGazeHeatColor(data, i * 4, t);
       }
 
       gazeHeatSourceCtx.putImageData(gazeHeatImage, 0, 0);
       gazeHeatmapCtx.clearRect(0, 0, gazeHeatmapCanvas.width, gazeHeatmapCanvas.height);
-      // Smoothing on: this is the upscale that turns the grid into a
-      // continuous field. It interpolates BETWEEN quantised colours, so each
-      // band keeps a thin, clean edge instead of a hard staircase — the bands
-      // stay distinct, the transitions stay smooth.
       gazeHeatmapCtx.imageSmoothingEnabled = true;
-      gazeHeatmapCtx.drawImage(gazeHeatSource, 0, 0, gazeHeatmapCanvas.width, gazeHeatmapCanvas.height);
+      // Chromium only uses its better resampling filter when asked. On a
+      // 10x-or-more upscale — which this is — plain bilinear is exactly what
+      // produces the diamond-shaped creases between cell centres.
+      gazeHeatmapCtx.imageSmoothingQuality = 'high';
+
+      // Upscaled in two steps rather than one. A single huge jump interpolates
+      // between cell centres that are 12+ pixels apart and shows the seams;
+      // going via an intermediate at 6x smooths each hop over a much shorter
+      // distance, and the second hop then has real detail to work from. This
+      // is the cheap standard trick for enlarging a small image without the
+      // grid showing through.
+      const midW = GAZE_HEAT_COLS * 6;
+      const midH = GAZE_HEAT_ROWS * 6;
+      if (gazeHeatMid.width !== midW || gazeHeatMid.height !== midH) {
+        gazeHeatMid.width = midW;
+        gazeHeatMid.height = midH;
+      }
+      gazeHeatMidCtx.clearRect(0, 0, midW, midH);
+      gazeHeatMidCtx.imageSmoothingEnabled = true;
+      gazeHeatMidCtx.imageSmoothingQuality = 'high';
+      gazeHeatMidCtx.drawImage(gazeHeatSource, 0, 0, midW, midH);
+
+      gazeHeatmapCtx.drawImage(gazeHeatMid, 0, 0, gazeHeatmapCanvas.width, gazeHeatmapCanvas.height);
       gazeHeatDirty = false;
     }
 
@@ -8821,10 +10108,15 @@
       const fresh = rawGazeX !== null && (now - lastGazeAt) < GAZE_SIGNAL_TIMEOUT_MS;
 
       if (fresh) {
-        // Normalised against the window, because gaze coordinates ARE window
-        // coordinates — the stage is just a scaled-down picture of it.
-        const nx = Math.min(1, Math.max(0, smoothedGazeX / window.innerWidth));
-        const ny = Math.min(1, Math.max(0, smoothedGazeY / window.innerHeight));
+        // ----- Display-only scaling -----
+        // Gaze coordinates are SCREEN coordinates, so they are normalised
+        // against the screen and then multiplied back up by whatever size this
+        // panel happens to be. The stage is a scaled-down picture of the whole
+        // screen, and this is the only place that scaling happens: nothing
+        // here is written back, and the detector and the orb never see these
+        // numbers. Resizing the panel changes the picture and nothing else.
+        const nx = Math.min(1, Math.max(0, smoothedGazeX / screenW()));
+        const ny = Math.min(1, Math.max(0, smoothedGazeY / screenH()));
 
         gazeTrail.push({ t: now, nx, ny });
         while (gazeTrail.length > 0 && now - gazeTrail[0].t > GAZE_TRAIL_MS) gazeTrail.shift();
@@ -8958,6 +10250,16 @@
           endStuckMoment(performance.now(), 'keyboard reject');
           return;
         }
+      }
+
+      // The keyboard fallback for summoning help, unchanged by every gesture
+      // that has come and gone behind it: Cmd/Ctrl+Shift+H asks outright, with
+      // no head tilt and no face needed. Ignored while a card is already open,
+      // which summonHelp() enforces itself.
+      if ((event.metaKey || event.ctrlKey) && event.shiftKey
+        && (event.key === 'h' || event.key === 'H')) {
+        summonHelp('Cmd/Ctrl+Shift+H');
+        return;
       }
 
       if (event.key === 'r' || event.key === 'R') {

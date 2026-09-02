@@ -241,6 +241,23 @@ window.gaze = (function () {
     return value < min ? min : value > max ? max : value;
   }
 
+  // ===== THE COORDINATE SPACE IS THE SCREEN =====
+  // Every gaze estimate this module produces, and every calibration target it
+  // is trained on, is in SCREEN pixels — the space window.screenX/screenY live
+  // in — not in the window's own viewport.
+  //
+  // It used to clamp to window.innerWidth/innerHeight, which made the mapping
+  // a function of whatever size the window happened to be. Shrink the window
+  // to 150px and every prediction outside that strip is flattened onto its
+  // edges: 100% of x readings clamp, and the detector downstream sees a reader
+  // whose eyes never leave two columns of pixels. The window's size is not a
+  // fact about where someone is looking, so it has no business in this path.
+  //
+  // Consumers that need viewport coordinates subtract the window's own origin
+  // themselves; that conversion is a display concern and belongs to them.
+  function screenW() { return (window.screen && window.screen.width) || window.innerWidth; }
+  function screenH() { return (window.screen && window.screen.height) || window.innerHeight; }
+
   // Turns one detection result into two features + signals, runs the fits,
   // and notifies the listener.
   function handleDetection(det) {
@@ -324,8 +341,10 @@ window.gaze = (function () {
       const rawY = fitY.c * latestFeatureY + fitY.d;
       trackClamping(now, rawX, rawY);
       gazeListener({
-        x: clamp(rawX, 0, window.innerWidth),
-        y: clamp(rawY, 0, window.innerHeight),
+        // Screen pixels, clamped to the screen. Independent of this window's
+        // size, position, and of whether it is even visible.
+        x: clamp(rawX, 0, screenW()),
+        y: clamp(rawY, 0, screenH()),
         rawX,
         rawY,
       });
@@ -342,20 +361,21 @@ window.gaze = (function () {
   function trackClamping(now, rawX, rawY) {
     if (clampWindow.since === 0) clampWindow.since = now;
     clampWindow.frames += 1;
-    if (rawX < 0 || rawX > window.innerWidth) clampWindow.xOut += 1;
+    if (rawX < 0 || rawX > screenW()) clampWindow.xOut += 1;
     if (rawY < 0) { clampWindow.yOut += 1; clampWindow.yBelow += 1; }
-    else if (rawY > window.innerHeight) { clampWindow.yOut += 1; clampWindow.yAbove += 1; }
+    else if (rawY > screenH()) { clampWindow.yOut += 1; clampWindow.yAbove += 1; }
 
     if (now - clampWindow.since < CLAMP_REPORT_MS) return;
 
     const pct = (n) => `${Math.round((n / clampWindow.frames) * 100)}%`;
     if (clampWindow.yOut > clampWindow.frames * 0.5) {
-      console.error(`[gaze] Y PREDICTION IS OFF-WINDOW on ${pct(clampWindow.yOut)} of frames ` +
-        `(${pct(clampWindow.yBelow)} above the top, ${pct(clampWindow.yAbove)} below the bottom). ` +
-        'Clamping is reporting these as 0 or as the window height — the fit is the problem, not the feature.');
+      console.error(`[gaze] Y PREDICTION IS OFF-SCREEN on ${pct(clampWindow.yOut)} of frames ` +
+        `(${pct(clampWindow.yBelow)} above the top, ${pct(clampWindow.yAbove)} below the bottom) ` +
+        `of a ${screenW()}x${screenH()} screen. ` +
+        'Clamping is reporting these as 0 or as the screen height — the fit is the problem, not the feature.');
     } else if (clampWindow.yOut > 0 || clampWindow.xOut > 0) {
-      console.log(`[gaze] off-window predictions over ${CLAMP_REPORT_MS / 1000}s: ` +
-        `x ${pct(clampWindow.xOut)}, y ${pct(clampWindow.yOut)}`);
+      console.log(`[gaze] off-screen predictions over ${CLAMP_REPORT_MS / 1000}s ` +
+        `(screen ${screenW()}x${screenH()}): x ${pct(clampWindow.xOut)}, y ${pct(clampWindow.yOut)}`);
     }
     clampWindow = { frames: 0, xOut: 0, yOut: 0, yBelow: 0, yAbove: 0, since: now };
   }
@@ -451,9 +471,56 @@ window.gaze = (function () {
     return { slope, intercept: (sT - slope * sF) / n };
   }
 
+  // ===== The y axis gets its own, regularised fit =====
+  // Plain least squares is the wrong estimator for this axis and always was.
+  // The vertical feature covers a far narrower range than the horizontal one,
+  // so to span the screen the slope has to be enormous — and an enormous slope
+  // multiplies every millimetre of landmark noise and head drift by the same
+  // factor, which is what puts y off the screen on most frames. Least squares
+  // has no way to trade a little bias for that variance; ridge does.
+  //
+  // The feature is standardised before the penalty is applied, so lambda means
+  // the same thing whatever range the feature happens to have — a raw penalty
+  // against a feature spanning 0.05 would annihilate the slope, and against
+  // one spanning 5 would do nothing. Lambda is expressed as a fraction of the
+  // sample count for the same reason: it is a shrinkage ratio, not an
+  // absolute.
+  //
+  // This is the Y AXIS ONLY. x keeps plain least squares, its own function and
+  // its own numbers; nothing about this is shared with it.
+  const Y_RIDGE_LAMBDA = 0.25;   // shrinkage as a fraction of n — y's, and only y's
+
+  function ridgeFitY(features, targets) {
+    const n = features.length;
+    if (n < 2) return null;
+
+    let fMean = 0, tMean = 0;
+    for (let i = 0; i < n; i++) { fMean += features[i]; tMean += targets[i]; }
+    fMean /= n;
+    tMean /= n;
+
+    let ss = 0;
+    for (let i = 0; i < n; i++) {
+      const d = features[i] - fMean;
+      ss += d * d;
+    }
+    const sd = Math.sqrt(ss / n);
+    if (!(sd > 1e-9)) return null;   // the feature never varied: no line to fit
+
+    // Standardised feature: sum(z*z) is exactly n, so the penalty below is a
+    // clean fraction of the data's own weight.
+    let sZT = 0;
+    for (let i = 0; i < n; i++) {
+      sZT += ((features[i] - fMean) / sd) * (targets[i] - tMean);
+    }
+    const slopeZ = sZT / (n + Y_RIDGE_LAMBDA * n);
+    const slope = slopeZ / sd;
+    return { slope, intercept: tMean - slope * fMean, sd, fMean, tMean };
+  }
+
   function refitMapping() {
     const rx = leastSquares(calibrationSamples.map((s) => s.fx), calibrationSamples.map((s) => s.x));
-    const ry = leastSquares(calibrationSamples.map((s) => s.fy), calibrationSamples.map((s) => s.y));
+    const ry = ridgeFitY(calibrationSamples.map((s) => s.fy), calibrationSamples.map((s) => s.y));
 
     // Said out loud rather than returned silently. A null here used to leave
     // the previous mapping in force with nothing in the log — so a y axis that
@@ -471,6 +538,56 @@ window.gaze = (function () {
     fitX = { a: rx.slope, b: rx.intercept };
     fitY = { c: ry.slope, d: ry.intercept };
     logFitState('refit');
+  }
+
+  // ===== The y fit, point by point =====
+  // The y coefficient, the regularisation behind it, and what it predicts at
+  // every distinct calibration position against where that position actually
+  // was. Nine rows, one per calibration point: a fit that cannot reach the top
+  // or the bottom of the screen says so here, in the residuals, rather than
+  // three minutes later as a stream of clamped frames.
+  function reportYFit(reason = 'calibration') {
+    if (!fitY || calibrationSamples.length === 0) {
+      console.warn(`[gaze] y fit report (${reason}): no y fit and/or no samples.`);
+      return;
+    }
+
+    // Samples are averaged per distinct target position — each calibration
+    // point contributed many frames, and nine rows is the report, not 180.
+    const byPoint = new Map();
+    for (const s of calibrationSamples) {
+      const key = `${Math.round(s.x)},${Math.round(s.y)}`;
+      const entry = byPoint.get(key) || { x: s.x, y: s.y, fySum: 0, n: 0 };
+      entry.fySum += s.fy;
+      entry.n += 1;
+      byPoint.set(key, entry);
+    }
+
+    const rows = [...byPoint.values()].sort((a, b) => a.y - b.y || a.x - b.x);
+    let sumAbs = 0;
+    let worst = 0;
+    const lines = rows.map((row, i) => {
+      const meanFY = row.fySum / row.n;
+      const predicted = fitY.c * meanFY + fitY.d;
+      const error = predicted - row.y;
+      sumAbs += Math.abs(error);
+      if (Math.abs(error) > Math.abs(worst)) worst = error;
+      const offScreen = predicted < 0 || predicted > screenH() ? '  OFF-SCREEN' : '';
+      return `          ${String(i + 1).padStart(2)}. actual y ${String(Math.round(row.y)).padStart(5)}px  ` +
+        `predicted ${String(Math.round(predicted)).padStart(6)}px  ` +
+        `error ${(error >= 0 ? '+' : '') + Math.round(error)}px  ` +
+        `(mean fy ${meanFY.toFixed(4)} over ${row.n} samples)${offScreen}`;
+    });
+
+    console.log(
+      `[gaze] Y FIT (${reason}) — ridge, lambda ${Y_RIDGE_LAMBDA} of n, ` +
+      `${calibrationSamples.length} samples over ${rows.length} point(s)\n` +
+      `        y coefficient c = ${fitY.c.toFixed(2)}   intercept d = ${fitY.d.toFixed(2)}\n` +
+      `        screen height ${screenH()}px\n` +
+      `        predicted vs actual, one row per calibration point:\n` +
+      lines.join('\n') + '\n' +
+      `        mean absolute error ${Math.round(sumAbs / rows.length)}px, ` +
+      `worst ${(worst >= 0 ? '+' : '') + Math.round(worst)}px`);
   }
 
   // The coefficients, the feature ranges behind them, and what the fit does at
@@ -793,6 +910,10 @@ window.gaze = (function () {
   // sample paired with the freshest features, then refits. Returns false only
   // when there is no fresh reading — the face was lost. There are no quality
   // gates: every frame with a face is eligible.
+  // xPixel/yPixel are SCREEN pixels — the same space the predictions come back
+  // in. Passing window-relative coordinates here trains the mapping on a frame
+  // of reference that moves when the window does, which is exactly the bug
+  // this space exists to prevent.
   function recordScreenPosition(xPixel, yPixel) {
     if (latestFeatureX === null || performance.now() - latestFeaturesAt > FEATURE_FRESH_MS) {
       lastRejection = 'no-fresh-features';
@@ -888,6 +1009,7 @@ window.gaze = (function () {
     clearCalibration,
     calibrationSize() { return calibrationSamples.length; },
     fitReport,
+    reportYFit,
     hasMapping() { return fitX !== null && fitY !== null; },
     isRunning() { return running; },
     engineInfo() { return engineDescription; },
