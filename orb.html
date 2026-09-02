@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>IRIS orb</title>
+  <style>
+    /* ===== The always-on-top orb window =====
+       This page is the ENTIRE contents of a transparent, frameless,
+       click-through BrowserWindow (see createOrbWindow() in main.js). There
+       is no chrome, no layout, and no interaction here on purpose: the only
+       thing that ever renders is the orb itself, and every pixel around it
+       has to stay genuinely see-through so the window never obscures what
+       you are actually reading underneath it.
+
+       It is a pure DISPLAY. It owns no state and does no tracking — the
+       gaze pipeline stays entirely in the main window, which pushes each
+       attention-state CHANGE here over IPC (see the script at the bottom). */
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      /* Transparent all the way down. If ANY of these painted a colour, the
+         window would show up as a solid rectangle floating over the screen
+         — the single most common way a transparent Electron window goes
+         wrong. The window itself is created with backgroundColor
+         '#00000000' for the same reason. */
+      background: transparent;
+      overflow: hidden;
+    }
+
+    body {
+      /* Belt and braces alongside the window's own setIgnoreMouseEvents():
+         nothing in here is selectable, draggable, or a click target. */
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+      -webkit-app-region: no-drag;
+    }
+
+    /* The window is parked flush into the TOP-LEFT corner of the screen
+       (positionOrbWindow() in main.js) and is far larger than the orb, so
+       the glow — which bleeds well past the 56px box — has room to spread.
+       The orb is offset 80px in from the window's own top-left rather than
+       centred in it, which is what puts the visible orb in the corner
+       instead of 150px inland.
+
+       These 80px MUST stay in step with ORB_CORE_INSET in main.js: that
+       constant is how the main process knows where the orb will actually
+       land once the window is placed.
+
+       Offsetting here rather than letting the window hang off the corner is
+       forced by macOS, which clamps a window's origin to the work area — a
+       negative x, or a y above the menu bar, snaps straight back. The upside
+       is that the glow now stops at the screen edge and the menu bar instead
+       of drawing over them.
+
+       Note this element is #orb-core, not #orb: in the main window those
+       are two nested elements because #orb carries the JS-driven position
+       transform while #orb-core carries the CSS blob animation, and they
+       would otherwise fight over the same `transform` property. Here there
+       is no position transform at all — the orb does not move — so only
+       the animated half of that pair is needed. */
+    #orb-core {
+      position: absolute;
+      top: 80px;
+      left: 80px;
+      width: 56px;
+      height: 56px;
+      margin: -28px 0 0 -28px; /* centres the core on that 80px, 80px point */
+      /* Softens the gradient, the glow and the ripple ring into a diffuse
+         cloud rather than a crisp circle — same value as the main window's
+         orb, and most of what makes it read as "glowing". */
+      filter: blur(8px);
+      /* Set per-state below as plain (non-keyframe) properties so a state
+         change CROSSFADES the colour and glow instead of snapping, while
+         the organic wobble keeps running underneath it uninterrupted. */
+      /* width/height/margin are in the transition because that is how the orb
+         swells when the card opens (see body.card-open below) - #orb-core's
+         `transform` is already owned by the blob keyframes, so growing it that
+         way would fight the animation. */
+      transition: background 0.6s ease, box-shadow 0.6s ease,
+                  opacity 0.22s ease,
+                  width 0.42s cubic-bezier(0.18, 0.9, 0.24, 1),
+                  height 0.42s cubic-bezier(0.18, 0.9, 0.24, 1),
+                  margin 0.42s cubic-bezier(0.18, 0.9, 0.24, 1);
+    }
+
+    /* ---- Peek: get out of the way when the pointer comes to the orb ----
+       The orb is parked in a corner of a window that is always on top, so it
+       is the one thing on screen that can permanently hide something. Moving
+       the mouse onto it is the natural way to ask "what is under there?", and
+       this is the answer: the orb drops to a ghost of itself — still visible
+       enough to know it is there and to keep aiming at, but no longer
+       covering anything — and comes straight back when the pointer leaves.
+
+       Opacity rather than display or visibility, so the blob animation, the
+       state colour and the glow all keep running underneath: what comes back
+       is the same orb in the same phase, not a fresh one popping in. */
+    #orb-core {
+      opacity: 1;
+    }
+    body.orb-peek #orb-core {
+      opacity: 0.1;
+    }
+
+    /* The orb swells while the card is out, so the card reads as having grown
+       from a bigger light rather than from an unchanged dot. */
+    body.card-open #orb-core {
+      width: 78px;
+      height: 78px;
+      margin: -39px 0 0 -39px;
+    }
+
+    /* ---- Attention states ----
+       Copied verbatim from index.html so the floating orb and the main
+       window's debug orb are the same object visually: same two colours
+       (calm blue, stuck red), same blob keyframes, same STUCK ripple. */
+
+    #orb-core.state-calm {
+      background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), rgb(88, 148, 240) 35%, rgba(88, 148, 240, 0) 72%);
+      box-shadow: 0 0 30px 6px rgba(88, 148, 240, 0.35), 0 0 60px 20px rgba(88, 148, 240, 0.15);
+      animation: blob-calm 6s ease-in-out infinite;
+    }
+    @keyframes blob-calm {
+      0%   { border-radius: 42% 58% 55% 45% / 45% 42% 58% 55%; transform: scale(1) rotate(0deg); }
+      33%  { border-radius: 55% 45% 42% 58% / 55% 58% 42% 45%; transform: scale(1.06) rotate(4deg); }
+      66%  { border-radius: 48% 52% 60% 40% / 40% 55% 45% 60%; transform: scale(0.97) rotate(-3deg); }
+      100% { border-radius: 42% 58% 55% 45% / 45% 42% 58% 55%; transform: scale(1) rotate(0deg); }
+    }
+
+    #orb-core.state-stuck {
+      background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgb(255, 70, 70) 35%, rgba(255, 70, 70, 0) 68%);
+      box-shadow: 0 0 50px 14px rgba(255, 70, 70, 0.55), 0 0 100px 36px rgba(255, 70, 70, 0.25);
+      animation: blob-stuck 1.1s ease-in-out infinite;
+    }
+    @keyframes blob-stuck {
+      0%   { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: scale(1) rotate(0deg); }
+      33%  { border-radius: 62% 38% 55% 45% / 42% 60% 38% 62%; transform: scale(1.16) rotate(8deg); }
+      66%  { border-radius: 40% 60% 62% 38% / 62% 40% 60% 38%; transform: scale(0.9) rotate(-8deg); }
+      100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: scale(1) rotate(0deg); }
+    }
+
+    /* The expanding "ripple" ring, only present while STUCK — the fast
+       urgent pulse layered on top of the (also faster, in blob-stuck above)
+       organic wobble. */
+    #orb-core.state-stuck::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgb(255, 70, 70);
+      animation: ripple-stuck 0.6s ease-out infinite;
+    }
+    @keyframes ripple-stuck {
+      0%   { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.8); opacity: 0; }
+    }
+
+    /* ═══════════════ Sphere orb style ═══════════════
+       The alternative look, selected in Dashboard > Appearance and applied by
+       a class on <body> so the state-swap code (which overwrites
+       #orb-core.className wholesale) never has to know it exists.
+
+       A lit sphere with a defined circular edge and soft colour bands turning
+       INSIDE it, rather than the classic style's edgeless blurred blob.
+
+       ---- One clock, harmonic divisions of it ----
+       Every moving part derives its period from --spin by a whole-number
+       ratio, so nothing drifts against anything else: the parts separate,
+       cross, and come back into register on a schedule you can feel rather
+       than several independent loops sliding past each other at random.
+
+           glow breath   0.5 x    (twice per turn)
+           crescent      1 x      the reference clock
+           body band     1.5 x    a three-against-two cross-rhythm
+           violet pass   2 x      half speed
+           edge focus    1.5 x    sharpens in step with the body band
+           terminator    3 x      the slow sweep everything else reads against
+
+       1 : 1.5 : 2 : 3 share a common multiple of 6, so the arrangement
+       returns to its starting configuration once every six turns and the
+       loop never announces itself. */
+
+    /* Registering the colour tokens is what makes them animatable: an
+       unregistered custom property is just a string and would jump from one
+       state to the next instead of crossfading. */
+    @property --c-void   { syntax: "<color>"; inherits: true; initial-value: #04060f; }
+    @property --c-deep   { syntax: "<color>"; inherits: true; initial-value: #101f4d; }
+    @property --c-mid    { syntax: "<color>"; inherits: true; initial-value: #4470ee; }
+    @property --c-hot    { syntax: "<color>"; inherits: true; initial-value: #9fdcff; }
+    @property --c-accent { syntax: "<color>"; inherits: true; initial-value: #7b5cff; }
+    @property --c-glow   { syntax: "<color>"; inherits: true; initial-value: rgba(78,132,255,0.42); }
+
+    /* The classic style's own painting is switched off wholesale here rather
+       than being made conditional everywhere above: the classic rules stay
+       exactly as they were, and this one block overrides them. */
+    body.orb-sphere #orb-core {
+      --size: 56px;
+      --spin: 12s;
+      --energy: 0.85;   /* how far everything swings off-centre */
+
+      /* Softness is a FRACTION OF THE ORB, not a fixed pixel count. A blur
+         that reads as a clean edge at inspection size is a smear at the
+         56px the orb actually ships at — tying it to --size keeps every
+         edge equally distinct however large the orb is drawn. */
+      --soft-hot:  calc(var(--size) * 0.024);
+      --soft-mid:  calc(var(--size) * 0.042);
+      --soft-acc:  calc(var(--size) * 0.034);
+      --soft-edge: calc(var(--size) * 0.055);
+      --soft-glow: calc(var(--size) * 0.070);
+
+      --c-void:   #04060f;  /* the unlit limb, top and bottom */
+      --c-deep:   #101f4d;  /* the sphere's own body colour */
+      --c-mid:    #4470ee;  /* main band */
+      --c-hot:    #9fdcff;  /* the bright crescent, and the lit side of the edge */
+      --c-accent: #7b5cff;  /* the second, slower band */
+      --c-glow:   rgba(78, 132, 255, 0.42);
+
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      /* Everything the classic style paints, off. */
+      background: none;
+      box-shadow: none;
+      filter: none;
+      animation: none;
+      /* The colour tokens are registered above, so a state change interpolates
+         them instead of snapping — the same crossfade the classic orb gets
+         from transitioning `background`, but carrying every layer at once.
+         Motion never stops underneath it. */
+      transition: --c-void 0.6s ease, --c-deep 0.6s ease, --c-mid 0.6s ease,
+                  --c-hot 0.6s ease, --c-accent 0.6s ease, --c-glow 0.6s ease;
+    }
+
+    /* Matches the classic orb's card-open swell, so the two styles grow by
+       the same amount when the help card comes out. */
+    body.orb-sphere.card-open #orb-core { --size: 78px; }
+
+    /* The classic style's stuck ripple has no place on a sphere with a
+       defined edge — a ring expanding out of it reads as a second object. */
+    body.orb-sphere #orb-core.state-stuck::after { display: none; }
+
+    /* The shell only exists for this style; the classic orb is a single
+       painted element and must not have these drawn over it. */
+    body:not(.orb-sphere) #orb-core .orb-shell { display: none; }
+
+    /* The bloom that spills past the sphere. Breathes at exactly half the base
+       period, so it peaks as the crescent reaches the top and again as it
+       reaches the bottom — the pulse lands on the motion rather than beside it. */
+    body.orb-sphere #orb-core::before {
+      content: "";
+      position: absolute;
+      inset: -26%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, var(--c-glow) 0%, rgba(0,0,0,0) 62%);
+      filter: blur(var(--soft-glow));
+      animation: orb-breathe calc(var(--spin) * 0.5) ease-in-out infinite;
+      will-change: transform, opacity;
+      pointer-events: none;
+    }
+    @keyframes orb-breathe {
+      0%, 100% { transform: scale(1);    opacity: 0.72; }
+      50%      { transform: scale(1.10); opacity: 1; }
+    }
+
+    /* The sphere body. It clips everything to a circle and, being a stacking
+       context, gives the layers inside something to screen-blend against. The
+       mask feathers only the last 3% so the limb is soft without the circle
+       itself going vague — this is the whole difference from the classic
+       style, which blurs the entire element and so has no edge at all. */
+    #orb-core .orb-shell {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      isolation: isolate;
+      background: radial-gradient(circle at 50% 44%,
+                  var(--c-deep) 0%,
+                  color-mix(in oklab, var(--c-deep) 55%, var(--c-void)) 58%,
+                  var(--c-void) 100%);
+      -webkit-mask: radial-gradient(circle at 50% 50%, #000 97%, rgba(0,0,0,0) 100%);
+              mask: radial-gradient(circle at 50% 50%, #000 97%, rgba(0,0,0,0) 100%);
+    }
+
+    /* ---- The bands ----
+       Each is wider than the sphere and turns about its centre, so what shows
+       through the circular clip is a crescent that sweeps, thins and re-forms.
+       Only transform is animated, so each is a single composited layer. */
+    #orb-core .orb-band {
+      position: absolute;
+      inset: -45%;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      will-change: transform;
+    }
+    /* The bright crescent, on the base clock. Its falloff is deliberately
+       short — full strength to 30%, gone by 54% — which is what gives it a
+       clean cut-off instead of fading away into haze. */
+    #orb-core .orb-band.a {
+      background: radial-gradient(ellipse 58% 21% at 50% 44%,
+                  var(--c-hot) 0%,
+                  var(--c-hot) 30%,
+                  color-mix(in oklab, var(--c-hot) 45%, transparent) 43%,
+                  rgba(0,0,0,0) 54%);
+      filter: blur(var(--soft-hot));
+      animation: orb-swirl-a var(--spin) linear infinite;
+    }
+    /* The broad body band at 1.5x — three turns of this against two of the
+       crescent. Softer on purpose: it is the ground the crescent cuts across,
+       so it carries colour without competing for an edge. */
+    #orb-core .orb-band.b {
+      background: radial-gradient(ellipse 70% 29% at 50% 57%,
+                  var(--c-mid) 0%,
+                  var(--c-mid) 26%,
+                  color-mix(in oklab, var(--c-mid) 40%, transparent) 46%,
+                  rgba(0,0,0,0) 62%);
+      filter: blur(var(--soft-mid));
+      opacity: 0.92;
+      animation: orb-swirl-b calc(var(--spin) * 1.5) linear infinite;
+    }
+    /* The violet pass at half speed, turning the other way. Narrow, and the
+       one that produces a second colour where it crosses the crescent. */
+    #orb-core .orb-band.c {
+      background: radial-gradient(ellipse 44% 18% at 57% 50%,
+                  var(--c-accent) 0%,
+                  var(--c-accent) 28%,
+                  color-mix(in oklab, var(--c-accent) 42%, transparent) 45%,
+                  rgba(0,0,0,0) 58%);
+      filter: blur(var(--soft-acc));
+      opacity: 0.8;
+      animation: orb-swirl-c calc(var(--spin) * 2) linear infinite;
+    }
+    @keyframes orb-swirl-a {
+      0%   { transform: rotate(0deg)   translate3d(0, calc(-7% * var(--energy)), 0) scale(1); }
+      50%  { transform: rotate(180deg) translate3d(0, calc(9% * var(--energy)), 0)  scale(1.12); }
+      100% { transform: rotate(360deg) translate3d(0, calc(-7% * var(--energy)), 0) scale(1); }
+    }
+    @keyframes orb-swirl-b {
+      0%   { transform: rotate(30deg)  translate3d(calc(4% * var(--energy)),  calc(6% * var(--energy)), 0)  scale(1.06); }
+      50%  { transform: rotate(210deg) translate3d(calc(-5% * var(--energy)), calc(-8% * var(--energy)), 0) scale(0.94); }
+      100% { transform: rotate(390deg) translate3d(calc(4% * var(--energy)),  calc(6% * var(--energy)), 0)  scale(1.06); }
+    }
+    @keyframes orb-swirl-c {
+      0%   { transform: rotate(90deg)   translate3d(calc(-6% * var(--energy)), 0, 0) scale(1); }
+      50%  { transform: rotate(-90deg)  translate3d(calc(7% * var(--energy)), calc(5% * var(--energy)), 0) scale(1.16); }
+      100% { transform: rotate(-270deg) translate3d(calc(-6% * var(--energy)), 0, 0) scale(1); }
+    }
+
+    /* ---- The terminator ----
+       The defined curve that separates one shade from another: a large
+       off-centre ellipse filled on the side facing the light and empty on the
+       other, so its boundary is a clean step from one shade to the next. This
+       is the single hardest edge inside the sphere, and it is what stops the
+       whole thing reading as a soft cloud — everything else is gradient, this
+       is an EDGE. No stroke sits on it; the change of shade is the event.
+
+       It revolves on the slowest clock in the arrangement (3x the base
+       period), so the bands sweep past it several times per pass and it reads
+       as the structure they are moving across rather than another moving part. */
+    #orb-core .orb-terminator {
+      position: absolute;
+      inset: -18%;
+      animation: orb-revolve calc(var(--spin) * 3) linear infinite;
+      will-change: transform;
+    }
+    @keyframes orb-revolve {
+      0%   { transform: rotate(0deg)   translate3d(0, calc(3% * var(--energy)), 0); }
+      50%  { transform: rotate(180deg) translate3d(0, calc(-4% * var(--energy)), 0); }
+      100% { transform: rotate(360deg) translate3d(0, calc(3% * var(--energy)), 0); }
+    }
+
+    /* Two copies of that same curve — one crisp, one blurred — sitting exactly
+       on top of each other and crossfading. Fading between a sharp and a soft
+       copy is how the edge "sometimes blurs" without animating `filter`, which
+       would force a repaint every frame; opacity stays on the compositor, and
+       the registration between the two copies never slips because they share
+       the revolving parent's transform.
+
+       The crossfade runs at 1.5x the base period, the same clock as the body
+       band, so the edge is at its sharpest exactly when that band is clear of
+       it and softest when the band washes over it. */
+    #orb-core .term-face {
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: screen;
+      background: radial-gradient(ellipse 74% 60% at 50% 112%,
+          color-mix(in oklab, var(--c-hot) 26%, transparent) 0 61.8%,
+          rgba(0,0,0,0) 61.8%);
+      will-change: opacity;
+    }
+    #orb-core .term-face.sharp {
+      animation: orb-focus-in calc(var(--spin) * 1.5) ease-in-out infinite;
+    }
+    #orb-core .term-face.soft {
+      filter: blur(var(--soft-edge));
+      animation: orb-focus-out calc(var(--spin) * 1.5) ease-in-out infinite;
+    }
+    @keyframes orb-focus-in  { 0%, 100% { opacity: 0.18; } 50% { opacity: 1; } }
+    @keyframes orb-focus-out { 0%, 100% { opacity: 1; }    50% { opacity: 0.22; } }
+
+    /* Sits over everything and turns a flat disc into a lit sphere: dark
+       poles, a terminator shadow at the bottom, one specular highlight up and
+       left, and a hairline rim. Static — the light source does not move. */
+    #orb-core .orb-sheen {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 124%, rgba(2, 4, 12, 0.72) 0%, rgba(0,0,0,0) 40%),
+        radial-gradient(circle at 50% -24%, rgba(2, 4, 12, 0.68) 0%, rgba(0,0,0,0) 40%),
+        radial-gradient(circle at 33% 22%, rgba(255, 255, 255, 0.17) 0%, rgba(0,0,0,0) 33%);
+      box-shadow:
+        inset 0 0 calc(var(--size) * 0.14) calc(var(--size) * 0.045) rgba(2, 4, 12, 0.62),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    }
+
+    /* ---- States: colour and energy only, never shape ----
+       One number sets the tempo. Because every period is a ratio of --spin,
+       the whole arrangement speeds up or slows down as a unit and the
+       relationships between the parts are identical in both states —
+       which is what "the same object, in a different mood" has to mean. */
+    body.orb-sphere #orb-core.state-calm {
+      --spin: 12s; --energy: 0.85;
+      --c-void: #04060f; --c-deep: #101f4d;
+      --c-mid: #4470ee; --c-hot: #9fdcff; --c-accent: #7b5cff;
+      --c-glow: rgba(78, 132, 255, 0.42);
+    }
+    body.orb-sphere #orb-core.state-stuck {
+      --spin: 4.4s; --energy: 1.34;
+      --c-void: #12030a; --c-deep: #4d0f1c;
+      --c-mid: #ff4646; --c-hot: #ffc0c8; --c-accent: #ff2d84;
+      --c-glow: rgba(255, 74, 84, 0.6);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.orb-sphere #orb-core::before,
+      #orb-core .orb-band,
+      #orb-core .orb-terminator,
+      #orb-core .term-face {
+        animation-duration: 0s;
+        animation-iteration-count: 1;
+      }
+    }
+
+    /* ---- The help card ----
+       Lives in THIS window so it can appear over whatever is being read. It
+       needs an opaque ground of its own: it floats over arbitrary content, and
+       without one the text renders straight onto whatever is underneath and is
+       unreadable — which is exactly what had happened here. */
+    #help-card {
+      position: absolute;
+      left: 150px;
+      top: 24px;
+      width: 348px;
+      box-sizing: border-box;
+      padding: 20px 22px 18px;
+      border-radius: 14px;
+      /* Solid, not translucent. A backdrop-filter would still let high-contrast
+         content bleed through and wreck legibility. */
+      background: #17171A;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      box-shadow: 0 26px 64px -18px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.5);
+      color: rgba(255, 255, 255, 0.94);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      /* Grows out of the orb: the orb core sits at (80, 80) in window
+         coordinates, which relative to this card's own top-left corner is
+         (80 - 150, 80 - 24). Scaling from there reads as the card unfolding
+         from the light rather than appearing beside it. */
+      transform-origin: -70px 56px;
+      transform: scale(0.04);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.42s cubic-bezier(0.18, 0.9, 0.24, 1), opacity 0.24s ease;
+    }
+    #help-card.open {
+      transform: scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* The slow fade that ignoring it triggers. Duration must stay in step with
+       HELP_PANEL_FADE_MS in index.html, which decides when the main window
+       finalises the dismissal. */
+    #help-card.open.fading {
+      opacity: 0;
+      transition: opacity 1.6s ease;
+    }
+
+    #help-card h2 {
+      margin: 0 0 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgb(34, 224, 255);
+    }
+    #help-card-body {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      /* Near-white on #17171A — comfortably past 4.5:1, which matters because
+         this is the one thing on the card you actually have to read. */
+      color: rgba(255, 255, 255, 0.94);
+      /* An answer can run long; the card scrolls rather than growing off the
+         bottom of the window. */
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    /* How to answer without the mouse. Muted on purpose — a reminder, not part
+       of the message. */
+    #help-card-hint {
+      margin: 14px 0 0;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      font-size: 11px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.42);
+    }
+    #help-card-hint:empty {
+      display: none;
+    }
+
+    /* ---- The offer prompt ----
+       The same card element in a smaller form, used for the FIRST stage of a
+       stuck moment: the orb turns red and this appears beside it saying "Need
+       help?" — and that is all that happens. Nothing has been captured and
+       nothing has been sent at this point; the card only fills with an answer
+       once the offer is accepted, at which point the compact class comes off
+       and it grows into the full card.
+
+       Deliberately small: it floats over whatever is being read, and at the
+       offer stage it has nothing to say beyond the question itself. */
+    #help-card.compact {
+      width: auto;
+      max-width: 260px;
+      padding: 12px 16px 13px;
+      border-radius: 12px;
+    }
+    #help-card.compact h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+      color: rgba(255, 255, 255, 0.94);
+    }
+    /* At the offer stage the body is empty — the heading IS the message. */
+    #help-card.compact #help-card-body:empty {
+      display: none;
+    }
+    #help-card.compact #help-card-hint {
+      margin-top: 8px;
+      padding-top: 8px;
+      font-size: 10px;
+    }
+
+    /* ---- Zone readout ----
+       Deliberately quiet: this is glanced at, not read. It sits to the right
+       of the orb, inside the window's existing bounds, and carries
+       pointer-events: none so it can never make the window claim a click. */
+    #zone-readout {
+      position: absolute;
+      left: 150px;
+      top: 34px;
+      width: 176px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(18, 18, 20, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.55);
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    #zone-readout.hidden {
+      display: none;
+    }
+    .zone-readout-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .zone-readout-row b {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .zone-readout-foot {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.38);
+    }
+    /* Recording indicator — the only feedback that a global shortcut landed,
+       since the debug panel is behind whatever is being read. */
+    #zr-rec.on {
+      color: rgb(255, 90, 90);
+    }
+  </style>
+</head>
+<body>
+  <!-- The orb. Its class is swapped by the script below whenever the main
+       window reports a new attention state. -->
+  <div id="orb-core" class="state-calm"><div class="orb-shell"><div class="orb-band a"></div><div class="orb-band b"></div><div class="orb-band c"></div><div class="orb-terminator"><div class="term-face soft"></div><div class="term-face sharp"></div></div><div class="orb-sheen"></div></div></div>
+
+  <!-- Optional numeric readout, toggled with Cmd/Ctrl+Shift+J. Sits beside the
+       orb so the zone numbers can be glanced at over whatever is in front. It
+       is display only and never made interactive, so the window stays fully
+       click-through with it showing. -->
+  <div id="zone-readout" class="hidden">
+    <div class="zone-readout-row"><span>progress</span><b id="zr-progress">–</b></div>
+    <div class="zone-readout-row"><span>revisits</span><b id="zr-revisits">–</b></div>
+    <div class="zone-readout-row"><span>concentration</span><b id="zr-conc">–</b></div>
+    <div class="zone-readout-foot"><span id="zr-zone">zone –</span><span id="zr-rec"></span></div>
+  </div>
+
+  <!-- The help card, collapsed into the orb until a STUCK moment opens it.
+       Everything in it is driven by the main window over IPC; this window
+       decides nothing about when it appears or what it says. -->
+  <div id="help-card">
+    <h2 id="help-card-title">Need help?</h2>
+    <p id="help-card-body"></p>
+    <p id="help-card-hint"></p>
+  </div>
+
+  <script>
+    'use strict';
+
+    // The orb window receives state; it never computes it. The main window
+    // owns the gaze loop, the progress number and the CALM/STUCK decision —
+    // red goes up the moment a stuck moment opens, and the four-second hold
+    // now only governs coming back off it — and sends one message per CHANGE
+    // (not per frame) via window.iris.setOrbState(). The main process relays
+    // it here.
+    const core = document.getElementById('orb-core');
+
+    // Anything not in this set is ignored rather than blindly written into
+    // className — a typo upstream should leave the orb showing its last
+    // valid state, not blank it out by applying a class with no styles.
+    const STATES = new Set(['calm', 'stuck']);
+
+    // Numbers pushed from the main window, which owns the zone tracker. This
+    // side only draws them.
+    const zoneReadout = document.getElementById('zone-readout');
+    const zrProgress = document.getElementById('zr-progress');
+    const zrRevisits = document.getElementById('zr-revisits');
+    const zrConc = document.getElementById('zr-conc');
+    const zrZone = document.getElementById('zr-zone');
+    const zrRec = document.getElementById('zr-rec');
+
+    window.iris.onOrbReadout((payload) => {
+      if (!payload) return;
+      zoneReadout.classList.toggle('hidden', !payload.visible);
+      if (!payload.visible) return;
+      zrProgress.textContent = payload.progress;
+      zrRevisits.textContent = payload.revisits;
+      zrConc.textContent = payload.concentration;
+      zrZone.textContent = payload.zone === null ? 'no signal' : 'zone ' + payload.zone;
+      zrRec.textContent = payload.logging ? '● REC' : '';
+      zrRec.classList.toggle('on', !!payload.logging);
+    });
+
+    // Which of the two orb looks to draw. Pushed by the main window whenever
+    // the choice changes in Dashboard > Appearance, and replayed by the main
+    // process when this window is (re)created so it never comes up in the
+    // wrong style. It is a body class rather than a class on #orb-core
+    // because onOrbState below overwrites #orb-core.className wholesale — a
+    // style class living there would be wiped by the next state change.
+    const ORB_STYLES = new Set(['classic', 'sphere']);
+
+    window.iris.onOrbStyle((style) => {
+      if (!ORB_STYLES.has(style)) return;
+      document.body.classList.toggle('orb-sphere', style === 'sphere');
+    });
+
+    window.iris.onOrbState((state) => {
+      if (!STATES.has(state)) return;
+
+      // Only touch the DOM when the state actually changed. Re-assigning the
+      // same class would restart the CSS animation from frame zero, making
+      // the orb visibly stutter.
+      const next = 'state-' + state;
+      if (core.className === next) return;
+      core.className = next;
+    });
+
+    // ===== The help card =====
+    // Also a pure view. The main window decides when it opens, what it says,
+    // and when it goes away; this window animates it, keeps the window
+    // click-through except over the card itself, reports where the card
+    // landed, and passes button presses back up.
+
+    const card = document.getElementById('help-card');
+    const cardTitle = document.getElementById('help-card-title');
+    const cardBody = document.getElementById('help-card-body');
+    const cardHint = document.getElementById('help-card-hint');
+
+    let cardOpen = false;
+
+    // Which buttons belong to which stage of the conversation.
+    //   offer   - the initial ask, Yes / I'm fine
+    //   loading - the request is in flight; the same buttons, but inert
+    //   answer  - Claude replied, single Close
+    //   error   - it failed, also a single Close
+    // The card only ever exists AFTER the offer has been accepted — the offer
+    // itself is just the red orb, with no card at all — so Yes / I'm fine have
+    // nothing left to ask and stay hidden. Close is the card's only button.
+
+    function renderCard(message) {
+      if (typeof message.title === 'string') cardTitle.textContent = message.title;
+      if (typeof message.body === 'string') cardBody.textContent = message.body;
+      if (typeof message.hint === 'string') cardHint.textContent = message.hint;
+      // Only when the sender says so, so an 'update' that carries no `compact`
+      // field — every streaming chunk — leaves the current form alone.
+      if (typeof message.compact === 'boolean') {
+        card.classList.toggle('compact', message.compact);
+      }
+    }
+
+    // ----- Where the card is -----
+    // The main window is the only one with gaze data, so it is the one that
+    // decides whether the card is being looked at - and to do that it needs
+    // the card's rectangle. Sent in this window's client coordinates;
+    // main.js converts it into the main window's viewport space.
+    //
+    // The card's height changes continuously while an answer streams in, so
+    // this is throttled to one report per frame at most rather than one per
+    // mutation.
+    let rectReportQueued = false;
+
+    function reportCardRect() {
+      rectReportQueued = false;
+      if (!cardOpen) {
+        window.iris.sendOrbCardRect(null);
+        return;
+      }
+      const rect = card.getBoundingClientRect();
+      window.iris.sendOrbCardRect({ x: rect.left, y: rect.top, w: rect.width, h: rect.height });
+    }
+
+    function queueRectReport() {
+      if (rectReportQueued) return;
+      rectReportQueued = true;
+      requestAnimationFrame(reportCardRect);
+    }
+
+    // Catches both the open/close animation and the card growing as text
+    // streams into it.
+    new ResizeObserver(queueRectReport).observe(card);
+
+    // ----- Click-through, except over the card -----
+    // The window is click-through so it never swallows a click meant for the
+    // app underneath - but the card's buttons have to be pressable. Mouse
+    // moves still arrive while click-through (the window is created with
+    // `forward: true`), so the pointer's own position is what drives the
+    // switch: mouse-opaque while it is over the card, click-through everywhere
+    // else.
+    //
+    // The margin matters. Flipping exactly at the card's edge means a fast
+    // pointer can arrive and click inside the same frame the crossing is still
+    // being relayed, and the click is swallowed. Switching early costs
+    // nothing - the extra strip is transparent and has no buttons in it.
+    const CARD_INTERACTIVE_MARGIN = 28;
+    let interactive = false;
+
+    function setInteractive(next) {
+      if (next === interactive) return;
+      interactive = next;
+      window.iris.setOrbCardInteractive(next);
+    }
+
+    // ----- Peek radius -----
+    // The orb core is centred on (80, 80) in this window's coordinates (see
+    // #orb-core), and is 56px across normally, 78px while the card is out.
+    // The trigger is generously bigger than either: the glow bleeds well past
+    // the core, so the orb LOOKS larger than it measures, and a hover target
+    // that matches the geometry rather than the appearance feels broken.
+    const ORB_CENTRE = 80;
+    const ORB_PEEK_RADIUS = 52;
+
+    function setPeek(on) {
+      document.body.classList.toggle('orb-peek', on);
+    }
+
+    function updatePeek(event) {
+      const dx = event.clientX - ORB_CENTRE;
+      const dy = event.clientY - ORB_CENTRE;
+      setPeek(Math.hypot(dx, dy) <= ORB_PEEK_RADIUS);
+    }
+
+    // The pointer leaving the window is not a mousemove, and without these the
+    // orb would stay ghosted after the cursor had gone somewhere else
+    // entirely. Both events are listened for because which one arrives depends
+    // on how the pointer left the forwarded, click-through window.
+    window.addEventListener('mouseleave', () => setPeek(false));
+    document.addEventListener('mouseout', (event) => {
+      if (!event.relatedTarget) setPeek(false);
+    });
+    window.addEventListener('blur', () => setPeek(false));
+
+    window.addEventListener('mousemove', (event) => {
+      // Runs first and unconditionally: the peek has nothing to do with the
+      // card, and it has to work in the ordinary case where no card is out.
+      updatePeek(event);
+
+      if (!cardOpen) {
+        setInteractive(false);
+        return;
+      }
+      const rect = card.getBoundingClientRect();
+      setInteractive(
+        event.clientX >= rect.left - CARD_INTERACTIVE_MARGIN &&
+        event.clientX <= rect.right + CARD_INTERACTIVE_MARGIN &&
+        event.clientY >= rect.top - CARD_INTERACTIVE_MARGIN &&
+        event.clientY <= rect.bottom + CARD_INTERACTIVE_MARGIN,
+      );
+    });
+
+    // ----- Opening and closing -----
+    function openCard(message) {
+      card.classList.remove('fading');
+      renderCard(message);
+      cardOpen = true;
+      // The orb swells while the card is out, so the two read as one object.
+      document.body.classList.add('card-open');
+      // Force a reflow so the browser has the collapsed state before the
+      // 'open' class arrives - without this the two class changes coalesce
+      // into one style resolution and the grow animation never runs.
+      void card.offsetWidth;
+      card.classList.add('open');
+      queueRectReport();
+    }
+
+    function closeCard() {
+      cardOpen = false;
+      card.classList.remove('open');
+      card.classList.remove('fading');
+      document.body.classList.remove('card-open');
+      // Say so immediately rather than waiting for a mousemove that may never
+      // come - the pointer can easily be nowhere near the card right now.
+      setInteractive(false);
+      reportCardRect();
+    }
+
+    window.iris.onOrbCard((message) => {
+      if (!message || !message.type) return;
+      if (message.type === 'show') openCard(message);
+      else if (message.type === 'update') renderCard(message);
+      else if (message.type === 'fade') card.classList.add('fading');
+      // Looked back at it before the fade finished — the main window cancels
+      // the dismissal, so the card comes back to full opacity.
+      else if (message.type === 'unfade') card.classList.remove('fading');
+      else if (message.type === 'hide') closeCard();
+    });
+
+  </script>
+</body>
+</html>

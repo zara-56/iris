@@ -1,0 +1,41 @@
+{
+  "name": "iris",
+  "version": "1.0.0",
+  "description": "Simplest possible Electron app that shows IRIS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
+    "@mediapipe/tasks-vision": "^1.0.1",
+    "dotenv": "^17.4.2"
+  },
+  "build": {
+    "appId": "com.zara.iris",
+    "productName": "IRIS",
+    "files": [
+      "**/*",
+      "!.env",
+      "!.gitignore",
+      "!build/**"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg",
+      "identity": null,
+      "extendInfo": {
+        "NSCameraUsageDescription": "IRIS uses your camera to track where you're looking, so the orb can follow your gaze instead of your mouse."
+      }
+    }
+  }
+}

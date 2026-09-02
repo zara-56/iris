@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- Tighter than index.html's CSP — this page has no camera/WebAssembly
+       use, just a form and a click handler, so it doesn't need
+       'wasm-unsafe-eval'. Still needs 'unsafe-inline' for the inline
+       <script>/<style> blocks below, same reasoning as index.html. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; object-src 'none';">
+  <title>IRIS Setup</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+    }
+    .card {
+      width: 380px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 28px 30px;
+      box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: rgb(91, 204, 227);
+    }
+    p {
+      margin: 0 0 18px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: rgb(91, 204, 227);
+      color: #111;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    #error {
+      color: rgb(255, 70, 70);
+      font-size: 12px;
+      margin-top: 10px;
+      min-height: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- This window only ever appears once, on first launch of a packaged
+       build with no key saved yet — see createSetupWindow() in main.js. -->
+  <div class="card">
+    <h1>Welcome to IRIS</h1>
+    <p>
+      Paste your Anthropic API key to finish setup. It's encrypted with your
+      Mac's Keychain and stored only on this device — it is never bundled
+      with the app itself.
+    </p>
+    <input id="key-input" type="password" placeholder="sk-ant-..." autofocus>
+    <button id="save-btn" type="button">Save and continue</button>
+    <div id="error"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById('key-input');
+    const button = document.getElementById('save-btn');
+    const errorEl = document.getElementById('error');
+
+    async function submit() {
+      button.disabled = true;
+      errorEl.textContent = '';
+
+      // window.iris.saveApiKey comes from preload.js — it hands the key to
+      // main.js, which encrypts it and (on success) opens the real app and
+      // closes this window, so there's nothing left to do here on success.
+      const result = await window.iris.saveApiKey(input.value);
+
+      if (!result.ok) {
+        errorEl.textContent = result.error;
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener('click', submit);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') submit();
+    });
+  </script>
+</body>
+</html>
